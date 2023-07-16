@@ -18,7 +18,7 @@ class Rating(db.Model):
     # Establishing relationships:
     # WILL DO LATER
 
-    # Constraint for rating score (1-5)
+    # Constraint for rating score (1-5) at the database level
     __table_args__ = (
         CheckConstraint('rating_score>=1 AND rating_score<=5',
                         name='rating_score_check')
