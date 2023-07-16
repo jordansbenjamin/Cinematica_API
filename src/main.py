@@ -17,10 +17,10 @@ def create_app():
     # configuring our app:
     app.config.from_object("config.app_config")
 
-    # creating our database object! This allows the use of ORM
+    # creating database object! This allows the use of ORM
     db.init_app(app)
 
-    # creating our marshmallow object! This allows the use of schemas
+    # creating marshmallow object! This allows the use of schemas
     ma.init_app(app)
 
     # creating the jwt and bcrypt objects! this allows the use of authentication
