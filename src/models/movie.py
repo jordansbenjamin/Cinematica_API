@@ -1,5 +1,6 @@
 from main import db
 
+
 class Movie(db.Model):
     # Table name for db
     __tablename__ = 'movies'
