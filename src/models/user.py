@@ -21,7 +21,7 @@ class User(db.Model):
     # User's password
     password = db.Column(db.String(64), nullable=False)
     # User's date joined
-    join_date = db.Column(db.DateTime(), default=datetime.utcnow)
+    join_date = db.Column(db.Date(), default=datetime.utcnow)
 
     # Establishing relationships:
     # WILL DO AFTER OTHER MODEL ARE CREATED FIRST
