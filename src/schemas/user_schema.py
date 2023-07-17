@@ -16,7 +16,5 @@ class UserSchema(ma.Schema):
 
 # Singular user schema instance for retreiving a single user
 user_schema = UserSchema()
-# COMMENTED OUT BECAUSE TECHNICALLY A USER ONLY HAS ONE WATCHLIST
-# WILL DELETE IN THE FUTURE, KEEPING IT JUST IN CASE
-# # Multiple users schema instance for retreiving multiple users
-# users_schema = UserSchema(many=True)
+# Multiple users schema instance for retreiving multiple users
+users_schema = UserSchema(many=True)

@@ -13,5 +13,7 @@ class WatchlistSchema(ma.Schema):
 
 # Singular watchlist schema instance for retreiving a single watchlist
 watchlist_schema = WatchlistSchema()
-# Multiple watchlists schema instance for retreiving multiple watchlists
-watchlists_schema = WatchlistSchema(many=True)
+# COMMENTED OUT BECAUSE TECHNICALLY A USER ONLY HAS ONE WATCHLIST
+# WILL DELETE IN THE FUTURE, KEEPING IT JUST IN CASE
+# # Multiple watchlists schema instance for retreiving multiple watchlists
+# watchlists_schema = WatchlistSchema(many=True)
