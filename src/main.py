@@ -31,10 +31,10 @@ def create_app():
     # from commands import db_commands
     # app.register_blueprint(db_commands)
 
-    # # import the controllers and activate the blueprints
-    # from controllers import registerable_controllers
-
-    # for controller in registerable_controllers:
-    #     app.register_blueprint(controller)
+    # import the controllers and activate the blueprints
+    from controllers import registerable_controllers
+    # Iterates through list of controllers to register
+    for controller in registerable_controllers:
+        app.register_blueprint(controller)
 
     return app
