@@ -19,7 +19,7 @@ class Rating(db.Model):
     # WILL DO LATER
 
     # Constraint for rating score (1-5) on database level
-    __table_args__ = (
-        CheckConstraint('rating_score>=1 AND rating_score<=5',
-                        name='rating_score_check')
-    )
+    # __table_args__ = (
+    #     CheckConstraint('rating_score>=1 AND rating_score<=5',
+    #                     name='rating_score_check')
+    # )

@@ -1,10 +1,10 @@
 from flask import Blueprint, jsonify
 from models.user import User
 from schemas.user_schema import user_schema, users_schema
-from watchlist_controller import watchlists_bp
-from movielog_controller import movielogs_bp
-from review_controller import reviews_bp
-from rating_controller import ratings_bp
+from controllers.watchlist_controller import watchlists_bp
+from controllers.movielog_controller import movielogs_bp
+from controllers.review_controller import reviews_bp
+from controllers.rating_controller import ratings_bp
 
 # Initialises flask blueprint with a /users url prefix
 users_bp = Blueprint('users', __name__, url_prefix="/users")

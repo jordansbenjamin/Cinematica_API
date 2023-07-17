@@ -15,7 +15,7 @@ class User(db.Model):
     # Sets the user's PK
     id = db.Column(db.Integer(), primary_key=True)
     # User's email
-    email = db.Colum(db.String(128), nullable=False, unique=True)
+    email = db.Column(db.String(128), nullable=False, unique=True)
     # User's username
     username = db.Column(db.String(64), nullable=False, unique=True)
     # User's password
