@@ -6,6 +6,12 @@ db_commands = Blueprint('db', __name__)
 
 @db_commands.cli.command("create")
 def create_db():
-    '''This command will initialise DB tables'''
+    '''Initialises DB tables'''
     db.create_all()
     print("DB Tables created!")
+
+@db_commands.cli.command("drop")
+def drop_db():
+    db.drop_all()
+    print("DB Tables dropped!")
+
