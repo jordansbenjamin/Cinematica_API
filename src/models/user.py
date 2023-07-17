@@ -21,7 +21,16 @@ class User(db.Model):
     # User's password
     password = db.Column(db.String(64), nullable=False)
     # User's date joined
-    join_date = db.Column(db.DateTime(), default=datetime.utcnow)
+    join_date = db.Column(db.Date(), default=datetime.utcnow)
 
     # Establishing relationships:
-    # WILL DO AFTER OTHER MODEL ARE CREATED FIRST
+    
+    # Establishes one-to-one relationship with Watchlist and MovieLog models
+    watchlist = db.relationship('Watchlist', back_populates='user', uselist=False, cascade='all, delete')
+    movielog = db.relationship('MovieLog', back_populates='user', uselist=False, cascade='all, delete')
+    # NOTE: SQLAlchemy sets relationships by default as one-to-many
+    # uselist=False changes this behaviour so it becomes one-to-one
+
+    # Establishes one-to-many relationship with Review and Rating models
+    review = db.relationship('Review', back_populates='user')
+    rating = db.relationship('Rating', back_populates='user')
