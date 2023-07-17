@@ -3,10 +3,10 @@ from models.watchlist import Watchlist
 from schemas.watchlist_schema import watchlist_schema
 
 # Initialises flask blueprint with a /watchlists url prefix
-watchlists = Blueprint('watchlists', __name__, url_prefix="/watchlists")
+watchlists_bp = Blueprint('watchlists', __name__)
 
 
-@watchlists.route("/", methods=["GET"])
+@watchlists_bp.route("/", methods=["GET"])
 def get_watchlists(user_id):
     '''GET endpoint/handler for fetching specified users watchlist available in the cinematica app'''
     # Query all watchlist instances from the DB

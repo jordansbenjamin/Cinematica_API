@@ -3,10 +3,10 @@ from models.movie import Movie
 from schemas.movie_schema import movie_schema, movies_schema
 
 # Initialises flask blueprint with a /movies url prefix
-movies = Blueprint('movies', __name__, url_prefix="/movies")
+movies_bp = Blueprint('movies', __name__, url_prefix="/movies")
 
 
-@movies.route("/", methods=["GET"])
+@movies_bp.route("/", methods=["GET"])
 def get_movies():
     '''GET endpoint/handler for fetching all movies available in the cinematica app'''
     # Query all movie instances from the DB
