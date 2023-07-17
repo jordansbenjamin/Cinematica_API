@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify
 from models.watchlist import Watchlist
 from schemas.watchlist_schema import watchlist_schema
 
-# Initialises flask blueprint with a /watchlists url prefix
+# Initialises flask blueprint for watchlists, prefix is nested and registered with users bp
 watchlists_bp = Blueprint('watchlists', __name__)
 
 

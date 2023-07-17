@@ -1,10 +1,14 @@
-from user_controller import users
-from movie_controller import movies
-from watchlist_controller import watchlists
+from user_controller import users_bp
+from movie_controller import movies_bp
+from watchlist_controller import watchlists_bp
+from movielog_controller import movielogs_bp
+from review_controller import reviews_bp
 
 registerable_controllers = [
-    users,
-    movies,
-    watchlists,
+    users_bp,
+    movies_bp,
+    watchlists_bp,
+    movielogs_bp,
+    reviews_bp
     # Rest will be added later
 ]

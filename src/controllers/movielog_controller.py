@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify
 from models.movielog import MovieLog
 from schemas.movielog_schema import movielog_schema
 
-# Initialises flask blueprint with a /movielogs url prefix
+# Initialises flask blueprint for movielogs, prefix is nested and registered with users bp
 movielogs_bp = Blueprint('movielogs', __name__)
 
 
