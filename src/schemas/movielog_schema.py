@@ -12,6 +12,8 @@ class MovieLogSchema(ma.Schema):
         ]
 
 # Singular movie_log schema instance for retreiving a single movie_log
-movie_log_schema = MovieLogSchema()
-# Multiple movie_logs schema instance for retreiving multiple movie_logs
-movie_logs_schema = MovieLogSchema(many=True)
+movielog_schema = MovieLogSchema()
+# COMMENTED OUT BECAUSE TECHNICALLY A USER ONLY HAS ONE MOVIELOG
+# WILL DELETE IN THE FUTURE, KEEPING IT JUST IN CASE
+# # Multiple movie_logs schema instance for retreiving multiple movie_logs
+# movie_logs_schema = MovieLogSchema(many=True)
