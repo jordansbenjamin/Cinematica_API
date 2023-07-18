@@ -16,11 +16,28 @@ users_bp.register_blueprint(reviews_bp, url_prefix='<int:user_id>/reviews')
 users_bp.register_blueprint(ratings_bp, url_prefix='<int:user_id>/ratings')
 
 @users_bp.route("/", methods=["GET"])
-def get_users():
+def get_all_users():
     '''GET endpoint/handler for fetching all users available in the cinematica app'''
-    # Query all user instances from the DB
+    # Queries all user instances from the DB
     users = User.query.all()
     # Serialises queried user instances from DB with marshmallow schema into Python DST
     result = users_schema.dump(users)
     # Returns the serialised data into JSON format for response
     return jsonify(result)
+
+@users_bp.route("/<int:user_id>", methods=["GET"])
+def get_one_user(user_id):
+    # Queries first instance of user filtered by ID
+    user = User.query.filter_by(id=user_id).first()
+
+    # Check if user exists
+    if user:
+        # Single user instance serialised
+        result = user_schema.dump(user)
+        # Returns user information back as JSON
+        return jsonify(result)
+    else:
+        return jsonify(message="User does not exist, please try again"), 404
+        # NOTE: This does the same thing, I'll keep it here for reference
+        # return abort(404, description="User does not exist")
+    
