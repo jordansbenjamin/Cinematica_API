@@ -14,9 +14,16 @@ class Rating(db.Model):
     # The date the movie is rated
     rating_date = db.Column(
         db.DateTime(), nullable=False, default=datetime.utcnow)
+    # Fk for user
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    # FK for movie
+    movie_id = db.Column(db.Integer, db.ForeignKey('movies.id'), nullable=False)
 
     # Establishing relationships:
-    # WILL DO LATER
+    
+    # Establishing relationship with User and Movie
+    user = db.relationship('User', back_populates='rating')
+    movie = db.relationship('Movie', back_populates='ratings')
 
     # Constraint for rating score (1-5) on database level
     # __table_args__ = (
