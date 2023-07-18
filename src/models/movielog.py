@@ -4,7 +4,7 @@ from datetime import datetime
 
 class MovieLog(db.Model):
     # Table name for db
-    __tablename__ = 'movie_logs'
+    __tablename__ = 'movielogs'
 
     # PK for each movie entry in the movie log
     id = db.Column(db.Integer(), primary_key=True)
