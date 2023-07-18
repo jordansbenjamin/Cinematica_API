@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request, abort
+from marshmallow.exceptions import ValidationError
 from main import db, bcrypt
 from models.user import User
 from schemas.user_schema import user_schema, users_schema
@@ -31,6 +32,7 @@ def get_all_users():
 
 @users_bp.route("/<int:user_id>", methods=["GET"])
 def get_one_user(user_id):
+    '''GET endpoint/handler for fetching single user by id'''
     # Queries first instance of user filtered by ID
     user = User.query.filter_by(id=user_id).first()
 
@@ -48,6 +50,7 @@ def get_one_user(user_id):
 
 @users_bp.route("/", methods=["POST"])
 def create_user():
+    '''POST endpoint/handler for creating/registering a new a '''
     # NOTE: Use exception handling to validate the fields loaded from the request body is provided
     user_body_data = user_schema.load(request.json)
     # Queries existing email from user_body_data email field
@@ -60,7 +63,7 @@ def create_user():
     # Checks if a user's email is registered
     if existing_email:
         return abort(409, description="Email already registered, please try again.")
-    # Checks if a user's username is registered    
+    # Checks if a user's username is registered
     elif existing_username:
         return abort(409, description="Username already registered, please try again.")
 
@@ -68,7 +71,8 @@ def create_user():
     new_user = User(
         email=user_body_data.get("email"),
         username=user_body_data.get("username"),
-        password=bcrypt.generate_password_hash(user_body_data.get("password"))
+        password=bcrypt.generate_password_hash(
+            user_body_data.get("password")).decode("utf-8")
     )
 
     # Add new user instance to db and commit
@@ -77,3 +81,75 @@ def create_user():
     # Returns new user information as a JSON respone
     response = user_schema.dump(new_user)
     return jsonify(response), 201
+
+
+@users_bp.route("/<int:user_id>", methods=["PUT"])
+# NOTE: Will add jwt_required when auth feature is added
+def update_user(user_id):
+    # Queries user from DB
+    user = User.query.filter_by(id=user_id).first()
+    # Checks if the user_id matches
+    if user.id != user_id:
+        return abort(401, description="You are not authorised to update or make changes to this user.")
+    # Input validation
+    try:
+        user_body_data = user_schema.load(request.json)
+    except ValidationError as error:
+        return jsonify(error.messages), 400
+
+    # User can update any fields indvidually with the aid for these functions to update user object in memory:
+    def update_email(user, new_email):
+        # Queries database by filtering email to find match of user_body_data
+        existing_user_email = User.query.filter_by(
+            email=new_email).first()
+        # If the same email already exist then abort
+        if existing_user_email:
+            return abort(409, description="Email is already registered.")
+        # Else update the users registered email with the new email passed in to the body data
+        else:
+            print("Email updated")
+            user.email = new_email
+
+    def update_username(user, new_username):
+        user.username = new_username
+
+    def update_password(user, new_password):
+        if bcrypt.check_password_hash(user.password, new_password):
+            return abort(409, description="Password can't be the same as current password.")
+        else:
+            user.password = bcrypt.generate_password_hash(new_password).decode("utf-8")
+
+    # Mapping keys to update functions
+    updates = {
+        "email": update_email,
+        "username": update_username,
+        "password": update_password
+    }
+
+    for field, update_func in updates.items():
+        if field in user_body_data:
+            result = update_func(user, user_body_data[field])
+            if result is not None:
+                return result
+            
+    db.session.commit()
+    response = user_schema.dump(user)
+    return jsonify(response)
+
+    # NOTE: THIS IS BEFORE IMPLEMENTING THE UPDATE FUNCTIONS
+    # # Checks to see if email is provided and is differemt from current registered email
+    # if "email" in user_body_data and user_body_data["email"] != user.email:
+    #     # Queries database by filtering email to find match of user_body_data
+    #     existing_user_email = User.query.filter_by(
+    #         email=user_body_data["email"]).first()
+    #     # If the same email already exist then abort
+    #     if existing_user_email:
+    #         return abort(409, description="Email is already registered.")
+    #     # Else update the users registered email with the new email passed in to the body data
+    #     user.emai = user_body_data["email"]
+
+    # if "username" in user_body_data:
+    #     user.username = user_body_data["username"]
+    # elif "password" in user_body_data:
+    #     if not bcrypt.check_password_hash(user.password, user_body_data["password"]):
+    #         pass
