@@ -43,7 +43,7 @@ def get_one_user(user_id):
         # Returns user information back as JSON
         return jsonify(response), 200
     else:
-        return abort(404, description="User does not exist")
+        return abort(404, description="User not found")
         # NOTE: This does the same thing, I'll keep it here for reference
         # return jsonify(message="User does not exist, please try again"), 404
 
@@ -117,7 +117,8 @@ def update_user(user_id):
         if bcrypt.check_password_hash(user.password, new_password):
             return abort(409, description="Password can't be the same as current password.")
         else:
-            user.password = bcrypt.generate_password_hash(new_password).decode("utf-8")
+            user.password = bcrypt.generate_password_hash(
+                new_password).decode("utf-8")
 
     # Mapping keys to update functions
     updates = {
@@ -131,7 +132,7 @@ def update_user(user_id):
             result = update_func(user, user_body_data[field])
             if result is not None:
                 return result
-            
+
     db.session.commit()
     response = user_schema.dump(user)
     return jsonify(response)
@@ -153,3 +154,24 @@ def update_user(user_id):
     # elif "password" in user_body_data:
     #     if not bcrypt.check_password_hash(user.password, user_body_data["password"]):
     #         pass
+
+
+@users_bp.route("/<int:user_id>", methods=["DELETE"])
+def delete_user(user_id):
+    # Queries user from DB
+    user = User.query.filter_by(id=user_id).first()
+    # Checks if user exists
+    if user:
+        # Save user data before deleting
+        user_data = user_schema.dump(user)
+        # If user exist, then delete user instance from DB
+        db.session.delete(user)
+        db.session.commit()
+        response = {
+            "message": "User sucessfully deleted!",
+            "user": user_data
+        }
+        return jsonify(response)
+    else:
+        # Responds with 404 message otherwise
+        return abort(404, description="User not found.")
