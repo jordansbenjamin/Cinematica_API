@@ -86,6 +86,7 @@ def create_user():
 @users_bp.route("/<int:user_id>", methods=["PUT"])
 # NOTE: Will add jwt_required when auth feature is added
 def update_user(user_id):
+    '''PUT endpoint for updating specified user'''
     # Queries user from DB
     user = User.query.filter_by(id=user_id).first()
     # Checks if the user_id matches
@@ -99,6 +100,10 @@ def update_user(user_id):
 
     # User can update any fields indvidually with the aid for these functions to update user object in memory:
     def update_email(user, new_email):
+        '''Updates the user email'''
+        # Checks to see if the new email matches with the current email
+        if user.email == new_email:
+            return abort(409, description="Cannot update, new email matches with current email, please try another email.")
         # Queries database by filtering email to find match of user_body_data
         existing_user_email = User.query.filter_by(
             email=new_email).first()
@@ -111,9 +116,11 @@ def update_user(user_id):
             user.email = new_email
 
     def update_username(user, new_username):
+        '''Updates the username'''
         user.username = new_username
 
     def update_password(user, new_password):
+        '''Updates the users password'''
         if bcrypt.check_password_hash(user.password, new_password):
             return abort(409, description="Password can't be the same as current password.")
         else:
@@ -158,6 +165,7 @@ def update_user(user_id):
 
 @users_bp.route("/<int:user_id>", methods=["DELETE"])
 def delete_user(user_id):
+    '''DELETE endpoint for deleting specified user'''
     # Queries user from DB
     user = User.query.filter_by(id=user_id).first()
     # Checks if user exists
