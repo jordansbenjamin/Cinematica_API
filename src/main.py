@@ -17,6 +17,8 @@ def create_app():
     # configuring our app:
     app.config.from_object("config.app_config")
 
+    app.json.sort_keys = False
+
     # creating database object! This allows the use of ORM
     db.init_app(app)
 
