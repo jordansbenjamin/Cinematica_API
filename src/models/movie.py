@@ -1,4 +1,5 @@
 from main import db
+from models.associations import watchlist_movie_association, movielog_movie_association
 
 
 class Movie(db.Model):
@@ -19,4 +20,14 @@ class Movie(db.Model):
     release_year = db.Column(db.Integer(), nullable=False)
 
     # Establishing relationships:
-    # WILL DO AFTER OTHER MODEL ARE CREATED FIRST
+
+    # Establishes many-to-many relationship with Watchlist and MovieLog models
+    # Note: Secondary parameter tells SQLAlchemy to use association table for handling many-to-many
+    watchlists = db.relationship(
+        'Watchlist', secondary=watchlist_movie_association, back_populates='movies')
+    movielogs = db.relationship(
+        'MovieLog', secondary=movielog_movie_association, back_populates='movies')
+
+    # Establishes one-to-many relationship with Review and Rating models
+    reviews = db.relationship('Review', back_populates='movie')
+    ratings = db.relationship('Rating', back_populates='movie')
