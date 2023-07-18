@@ -1,5 +1,6 @@
 from main import db
 from datetime import datetime
+from models.associations import movielog_movie_association
 
 
 class MovieLog(db.Model):
@@ -12,5 +13,16 @@ class MovieLog(db.Model):
     log_date = db.Column(db.DateTime(), nullable=False,
                          default=datetime.utcnow)
 
+    # FK for user
+    # unique parameter set to True to enforce one-to-one relation
+    user_id = db.Column(db.Integer, db.ForeignKey(
+        'users.id'), nullable=False, unique=True)
+
     # Establishing relationships:
-    # WILL DO LATER
+
+    # Establishes (one-to-one) relationship with user
+    user = db.relationship('User', back_populates='movielog')
+
+    # Establishes many-to-many relationship with Movie model through association table
+    movies = db.relationship(
+        'Movie', secondary=movielog_movie_association, back_populates='movielogs')

@@ -25,7 +25,8 @@ class Movie(db.Model):
     # Note: Secondary parameter tells SQLAlchemy to use association table for handling many-to-many
     watchlists = db.relationship(
         'Watchlist', secondary=watchlist_movie_association, back_populates='movies')
-    movielogs = db.relationship('MovieLog', secondary=movielog_movie_association, back_populates='movies')
+    movielogs = db.relationship(
+        'MovieLog', secondary=movielog_movie_association, back_populates='movies')
 
     # Establishes one-to-many relationship with Review and Rating models
     reviews = db.relationship('Review', back_populates='movie')
