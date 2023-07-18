@@ -17,12 +17,13 @@ class Rating(db.Model):
     # Fk for user
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     # FK for movie
-    movie_id = db.Column(db.Integer, db.ForeignKey('movies.id'), nullable=False)
+    movie_id = db.Column(db.Integer, db.ForeignKey(
+        'movies.id'), nullable=False)
 
     # Establishing relationships:
-    
+
     # Establishing relationship with User and Movie
-    user = db.relationship('User', back_populates='rating')
+    user = db.relationship('User', back_populates='ratings')
     movie = db.relationship('Movie', back_populates='ratings')
 
     # Constraint for rating score (1-5) on database level

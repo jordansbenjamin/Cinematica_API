@@ -34,7 +34,7 @@ class User(db.Model):
     # uselist=False changes this behaviour so it becomes one-to-one
 
     # Establishes one-to-many relationship with Review and Rating models
-    review = db.relationship(
+    reviews = db.relationship(
         'Review', back_populates='user', cascade='all, delete')
-    rating = db.relationship(
+    ratings = db.relationship(
         'Rating', back_populates='user', cascade='all, delete')
