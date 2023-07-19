@@ -119,4 +119,20 @@ def update_movie(movie_id):
         db.session.commit()
         
     response = movie_schema.dump(movie)
-    return jsonify(response)
+    return jsonify(response), 200
+
+@movies_bp.route("/<int:movie_id>", methods=["DELETE"])
+def delete_movie(movie_id):
+    movie = Movie.query.filter_by(id=movie_id).first()
+
+    if not movie:
+        return abort(404, description="Movie not found.")
+    else:
+        movie_data = movie_schema.dump(movie)
+        db.session.delete(movie)
+        db.session.commit()
+        response = {
+            "message": "Movie successfully deleted!",
+            "deleted_movie": movie_data
+        }
+        return jsonify(response), 200
