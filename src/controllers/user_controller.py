@@ -50,7 +50,7 @@ def get_one_user(user_id):
 
 @users_bp.route("/", methods=["POST"])
 def create_user():
-    '''POST endpoint/handler for creating/registering a new a '''
+    '''POST endpoint/handler for creating/registering a new user'''
     # NOTE: Use exception handling to validate the fields loaded from the request body is provided
     user_body_data = user_schema.load(request.json)
     # Queries existing email from user_body_data email field

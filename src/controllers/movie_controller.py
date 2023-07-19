@@ -1,4 +1,5 @@
-from flask import Blueprint, jsonify, abort
+from flask import Blueprint, jsonify, request, abort
+from main import db
 from models.movie import Movie
 from schemas.movie_schema import movie_schema, movies_schema
 
@@ -29,3 +30,32 @@ def get_movie(movie_id):
     # Returns jsonified response
     response = movie_schema.dump(movie)
     return jsonify(response), 200
+
+
+@movies_bp.route("/", methods=["POST"])
+def add_movie():
+    # NOTE: Use exception handling to validate the fields loaded from the request body is provided
+    movie_body_data = movie_schema.load(request.json)
+    # Queries existing movie filtered by title and director
+    existing_movie = Movie.query.filter_by(
+        title=movie_body_data['title'], director=movie_body_data['director']).first()
+
+    if existing_movie:
+        return abort(409, description="Movie with the same director already exists, please try again.")
+
+    # Create new Movie instance
+    new_movie = Movie(
+        title=movie_body_data.get('title'),
+        director=movie_body_data.get('director'),
+        genre=movie_body_data.get('genre'),
+        runtime=movie_body_data.get('runtime'),
+        release_year=movie_body_data.get('release_year'),
+    )
+
+    # Add new user instance to db and commit
+    db.session.add(new_movie)
+    db.session.commit()
+    # Returns new user information as a JSON respone
+    response = movie_schema.dump(new_movie)
+    return jsonify(response), 201
+
