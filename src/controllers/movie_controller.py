@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request, abort
+from marshmallow.exceptions import ValidationError
 from main import db
 from models.movie import Movie
 from schemas.movie_schema import movie_schema, movies_schema
@@ -52,10 +53,70 @@ def add_movie():
         release_year=movie_body_data.get('release_year'),
     )
 
-    # Add new user instance to db and commit
+    # Add new movie instance to db and commit
     db.session.add(new_movie)
     db.session.commit()
-    # Returns new user information as a JSON respone
+    # Returns new movie information as a JSON respone
     response = movie_schema.dump(new_movie)
     return jsonify(response), 201
 
+
+@movies_bp.route("/<int:movie_id>", methods=["PUT"])
+def update_movie(movie_id):
+
+    movie = Movie.query.filter_by(id=movie_id).first()
+
+    try:
+        movie_body_data = movie_schema.load(request.json)
+    except ValidationError as error:
+        return jsonify(error.messages), 400
+
+    def update_title(movie, new_title):
+        '''Updates the movie title'''
+        movie.title = new_title
+
+    def update_director(movie, new_director):
+        movie.director = new_director
+
+    def update_genre(movie, new_genre):
+        movie.genre = new_genre
+
+    def update_runtime(movie, new_runtime):
+        movie.runtime = new_runtime
+
+    def update_release_year(movie, new_release_year):
+        movie.release_year = new_release_year
+
+    # Mapping keys to update functions
+    updates = {
+        "title": update_title,
+        "director": update_director,
+        "genre": update_genre,
+        "runtime": update_runtime,
+        "release_year": update_release_year
+    }
+
+    for field, update_func in updates.items():
+        if field in movie_body_data:
+            result = update_func(movie, movie_body_data[field])
+            if result is not None:
+                return result
+            
+    # Checks to see if updated movie is a duplicate
+    # Queries DB through filter, excludes current updated movie
+    # Checks if both title and directors exists in DB AND matches with updated movie
+    existing_movie = Movie.query.filter(
+        Movie.id != movie.id,
+        Movie.title == movie.title,
+        Movie.director == movie.director
+    ).first()
+
+    if existing_movie:
+        # Rolls back changes made if movie is a dupe
+        db.session.rollback()
+        return abort(409, description="Movie with the same director and title already exists, please try again.")
+    else:
+        db.session.commit()
+        
+    response = movie_schema.dump(movie)
+    return jsonify(response)
