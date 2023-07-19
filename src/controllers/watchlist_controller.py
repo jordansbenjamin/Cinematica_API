@@ -99,3 +99,5 @@ def delete_movie_from_watchlist(user_id):
     except Exception as error:
         db.session.rollback()
         return jsonify(message=str(error)), 500
+
+# NOTE: WILL NEED TO REVISIT THIS CONTROLLER TO CLEAN AND TIGHTEN UP THE LOGIC, ADD VALIDATION, ETC.
