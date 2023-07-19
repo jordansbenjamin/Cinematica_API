@@ -50,7 +50,7 @@ def get_one_user(user_id):
 
 @users_bp.route("/", methods=["POST"])
 def create_user():
-    '''POST endpoint/handler for creating/registering a new a '''
+    '''POST endpoint/handler for creating/registering a new user'''
     # NOTE: Use exception handling to validate the fields loaded from the request body is provided
     user_body_data = user_schema.load(request.json)
     # Queries existing email from user_body_data email field
@@ -175,11 +175,12 @@ def delete_user(user_id):
         # If user exist, then delete user instance from DB
         db.session.delete(user)
         db.session.commit()
+        # Create custom response message
         response = {
             "message": "User sucessfully deleted!",
             "user": user_data
         }
-        return jsonify(response)
+        return jsonify(response), 200
     else:
         # Responds with 404 message otherwise
         return abort(404, description="User not found.")
