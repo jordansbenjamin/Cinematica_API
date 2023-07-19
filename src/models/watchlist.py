@@ -9,9 +9,10 @@ class Watchlist(db.Model):
 
     # PK for each movie entry in the watchlist
     id = db.Column(db.Integer(), primary_key=True)
+    # REMOVING THIS FOR NOW
     # Date movie is added to the watchlist
-    date_added = db.Column(db.DateTime(), nullable=False,
-                           default=datetime.utcnow)
+    # date_added = db.Column(db.DateTime(), nullable=False,
+    #                        default=datetime.utcnow)
     # FK for user
     # unique parameter set to True to enforce one-to-one relation
     user_id = db.Column(db.Integer, db.ForeignKey(
