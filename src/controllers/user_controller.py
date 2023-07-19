@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request, abort
 from marshmallow.exceptions import ValidationError
 from main import db, bcrypt
 from models.user import User
+from models.watchlist import Watchlist
 from schemas.user_schema import user_schema, users_schema
 from controllers.watchlist_controller import watchlists_bp
 from controllers.movielog_controller import movielogs_bp
@@ -14,7 +15,7 @@ users_bp = Blueprint('users', __name__, url_prefix="/users")
 # Nesting users blueprint prefix endpoint with other bp endpoints:
 users_bp.register_blueprint(
     watchlists_bp, url_prefix='<int:user_id>/watchlist')
-users_bp.register_blueprint(movielogs_bp, url_prefix='<int:user_id>/movielogs')
+users_bp.register_blueprint(movielogs_bp, url_prefix='<int:user_id>/movielog')
 users_bp.register_blueprint(reviews_bp, url_prefix='<int:user_id>/reviews')
 users_bp.register_blueprint(ratings_bp, url_prefix='<int:user_id>/ratings')
 
@@ -78,6 +79,15 @@ def create_user():
     # Add new user instance to db and commit
     db.session.add(new_user)
     db.session.commit()
+
+    # TESTING:
+    # Creates new watchlist instance for the user
+    new_watchlist = Watchlist(user_id=new_user.id)
+
+    # Add new watchlist instance to db and commit
+    db.session.add(new_watchlist)
+    db.session.commit()
+
     # Returns new user information as a JSON respone
     response = user_schema.dump(new_user)
     return jsonify(response), 201

@@ -2,6 +2,7 @@ from flask import Blueprint
 from main import db, bcrypt
 from models.user import User
 from models.movie import Movie
+from models.watchlist import Watchlist
 
 # Initialises flask blueprint for DB CLI commands
 db_commands = Blueprint('db', __name__)
@@ -38,7 +39,18 @@ def seed_db():
         ),
     ]
 
-    db.session.add_all(users)
+    # db.session.add_all(users)
+    # TESTING: 
+    for user in users:
+        db.session.add(user)
+
+    db.session.commit()
+
+    watchlists = [
+        Watchlist(user_id=user.id) for user in users
+    ]
+
+    db.session.add_all(watchlists)
 
     # Creates movie instances within a list instead of separating each instance and having to add each instance everytime
     movies = [
