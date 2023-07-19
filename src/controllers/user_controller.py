@@ -175,11 +175,12 @@ def delete_user(user_id):
         # If user exist, then delete user instance from DB
         db.session.delete(user)
         db.session.commit()
+        # Create custom response message
         response = {
             "message": "User sucessfully deleted!",
             "user": user_data
         }
-        return jsonify(response)
+        return jsonify(response), 200
     else:
         # Responds with 404 message otherwise
         return abort(404, description="User not found.")
