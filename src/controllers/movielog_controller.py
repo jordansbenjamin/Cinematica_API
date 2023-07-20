@@ -20,22 +20,25 @@ def get_movielogs(user_id):
     # Returns the serialised data into JSON format for response
     return jsonify(result)
 
-@movielogs_bp.route("/<int:movielog_id>/movies/<int:movie_id>/", methods=["POST"])
-def add_movie_to_movielog(user_id, movielog_id, movie_id):
-    
-    # Another way of querying that is more concise, only when querying by primarykey/id
-    movielog = MovieLog.query.get(movielog_id)
-    # More verbose and specific way through filtering
-    # movielog = MovieLog.query.filter_by(id=movielog_id).first()
+
+@movielogs_bp.route("/movies/<int:movie_id>/", methods=["POST"])
+def add_movie_to_movielog(user_id, movie_id):
+    '''POST endpoint/handler for adding a movie to a user's movielog'''
+    # NOTE: I removed the need for the movielog_id in the actual route path
+    # Because its inferred that a movielog belongs to the user via the user_id
+    # This will be checked via jWt
+
+    # Queries movielog filtered by user_id
+    movielog = MovieLog.query.filter_by(user_id=user_id).first()
 
     if not movielog or movielog.user_id != user_id:
         return jsonify(message="Movielog not found for this user"), 404
-    
+
     # Getting the movie
     movie = Movie.query.get(movie_id)
     if not movie:
         return jsonify(message="Movie not found."), 404
-    
+
     # Add the movie to the movielog if all else is successful
     movielog.movies.append(movie)
 
