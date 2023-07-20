@@ -13,7 +13,7 @@ class Rating(db.Model):
     rating_score = db.Column(db.Integer(), nullable=False)
     # The date the movie is rated
     rating_date = db.Column(
-        db.DateTime(), nullable=False, default=datetime.utcnow)
+        db.Date(), nullable=False, default=datetime.utcnow)
     # Fk for user
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     # FK for movie
