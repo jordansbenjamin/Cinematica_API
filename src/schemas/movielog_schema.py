@@ -1,14 +1,16 @@
 from main import ma
-
+from marshmallow import fields
+from schemas.movie_schema import MovieLogMovieSchema
 
 class MovieLogSchema(ma.Schema):
+    movies = fields.Nested(MovieLogMovieSchema, many=True, attribute="movies")
     class Meta:
         # Orders the fields in the way they are defined in the schema when serialising or deserialising 
         ordered = True
         # Fields that will be included during serealisation
         fields = [
             'id',
-            'log_date',
+            'movies',
         ]
 
 # Singular movie_log schema instance for retreiving a single movie_log
