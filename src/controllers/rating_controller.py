@@ -65,11 +65,28 @@ def update_movie_rating(user_id, movie_id):
         user_id=user_id, movie_id=movie_id).first()
 
     if not existing_rating:
-        return jsonify(message="No existing rating found for this movie by this user.")
+        return jsonify(message="No existing rating found for this movie by this user."), 404
 
     existing_rating.rating_score = rating_body_data["rating_score"]
 
     db.session.commit()
-    
+
     response = rating_schema.dump(existing_rating)
     return jsonify(response), 200
+
+
+@ratings_bp.route("/movies/<int:movie_id>/", methods=["DELETE"])
+def remove_movie_rating(user_id, movie_id):
+
+    existing_rating = Rating.query.filter_by(
+        user_id=user_id, movie_id=movie_id).first()
+
+    if not existing_rating:
+        return jsonify(message="No existing rating found for this movie by this user."), 404
+
+    response = rating_schema.dump(existing_rating)
+
+    db.session.delete(existing_rating)
+    db.session.commit()
+
+    return jsonify(message="Movie rating sucessfully removed.", deleted_rating=response), 200
