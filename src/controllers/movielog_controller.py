@@ -31,7 +31,7 @@ def add_movie_to_movielog(user_id, movie_id):
     # Queries movielog filtered by user_id
     movielog = MovieLog.query.filter_by(user_id=user_id).first()
 
-    if not movielog or movielog.user_id != user_id:
+    if not movielog:
         return jsonify(message="Movielog not found for this user"), 404
 
     # Getting the movie
@@ -49,3 +49,29 @@ def add_movie_to_movielog(user_id, movie_id):
     except IntegrityError:
         db.session.rollback()
         return jsonify(message="Movie already in movielog"), 400
+
+@movielogs_bp.route("/movies/<int:movie_id>/", methods=["DELETE"])
+def remove_movie_from_movielog(user_id, movie_id):
+    '''DELETE endpoint/handler for removing a movie from a user's movielog'''
+    movielog = MovieLog.query.filter_by(user_id=user_id).first()
+
+    if not movielog:
+        return jsonify(message="Movielog not found for this user"), 404
+
+    movie = Movie.query.get(movie_id)
+
+    if not movie:
+        return jsonify(message="Movie not found"), 404
+    
+    if movie not in movielog.movies:
+        return jsonify(message="Movie not found in movielog to remove"), 400
+    
+    movielog.movies.remove(movie)
+
+    try:
+        db.session.commit()
+        movie_data = movie_schema.dump(movie)
+        return jsonify(message="Movie successfully removed from movielog!", movie=movie_data), 200
+    except Exception as error:
+        db.session.rollback()
+        return jsonify(message=str(error)), 500
