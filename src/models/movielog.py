@@ -9,9 +9,10 @@ class MovieLog(db.Model):
 
     # PK for each movie entry in the movie log
     id = db.Column(db.Integer(), primary_key=True)
-    # Date movie is added to the movie log
-    log_date = db.Column(db.DateTime(), nullable=False,
-                         default=datetime.utcnow)
+    # REMOVING THIS SIMILAR TO WATCHLIST
+    # # Date movie is added to the movie log
+    # log_date = db.Column(db.DateTime(), nullable=False,
+    #                      default=datetime.utcnow)
 
     # FK for user
     # unique parameter set to True to enforce one-to-one relation
