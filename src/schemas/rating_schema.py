@@ -1,4 +1,5 @@
 from main import ma
+from marshmallow import post_dump
 from schemas.movie_schema import MovieSchema
 
 class RatingSchema(ma.Schema):
@@ -13,6 +14,14 @@ class RatingSchema(ma.Schema):
             'movie'
         ]
     movie = ma.Nested(MovieSchema)
+
+    # post_dump decorator will call the format rating func after schema dumps the data
+    @post_dump
+    # Self refers to instance of the schema, data is the serialised data that RatingSchema created
+    def format_rating(self, data, **kwargs):
+        '''Modify the rating_score to be a string in the format "5/5"'''
+        data['rating_score'] = f"{data['rating_score']}/5"
+        return data
     
 
 # Singular rating schema instance for retreiving a single rating
