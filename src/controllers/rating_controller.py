@@ -72,6 +72,11 @@ def update_movie_rating(user_id, movie_id):
 
     if not existing_rating:
         return jsonify(message="No existing rating found for this movie by this user."), 404
+    
+    rating_score = rating_body_data.get("rating_score")
+
+    if not 1 <= rating_score <= 5:
+        return jsonify(message="Invalid rating. Rating should be between 1 and 5."), 400
 
     existing_rating.rating_score = rating_body_data["rating_score"]
 
