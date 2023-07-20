@@ -27,7 +27,7 @@ def get_ratings(user_id):
 def add_movie_rating(user_id, movie_id):
     '''POST endpoint/handler for adding a movie rating for the specified user'''
 
-    rating_body_data = rating_schema.dump(request.json)
+    rating_body_data = rating_schema.load(request.json)
 
     # Get the movie from DB
     movie = Movie.query.get(movie_id)
@@ -54,3 +54,5 @@ def add_movie_rating(user_id, movie_id):
     # Return the new rating as a JSON response
     response = rating_schema.dump(new_rating)
     return jsonify(response), 201
+
+
