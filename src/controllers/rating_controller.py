@@ -10,8 +10,12 @@ ratings_bp = Blueprint('ratings', __name__)
 def get_ratings(user_id):
     '''GET endpoint/handler for fetching specified users movie ratings'''
     # Queries rating instance from the DB
-    ratings = Rating.query.filter_by(user_id=user_id).first()
+    ratings = Rating.query.filter_by(user_id=user_id).all()
     # Serialises queried rating instances from DB with marshmallow schema into Python DST
+
+    if len(ratings) < 1:
+        return jsonify(message="You have not rated a movie yet."), 404
+
     response = ratings_schema.dump(ratings)
     # Returns the serialised data into JSON format for response
     return jsonify(response)
