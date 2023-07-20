@@ -34,9 +34,23 @@ class WatchlistMovieSchema(ma.Schema):
 
     class Meta:
         ordered = True
-        fields = ('id', 'title', 'director', 'genre', 'runtime', 'release_year', 'date_added')
-
+        fields = ('id', 'title', 'director', 'genre',
+                  'runtime', 'release_year', 'date_added')
 
 
 watchlist_movie_schema = WatchlistMovieSchema()
 watchlist_movies_schema = WatchlistMovieSchema(many=True)
+
+
+class MovieLogMovieSchema(ma.Schema):
+    # TESTING: To see if it works without specifying class variables like the watchlistmovieschema
+    date_logged = fields.DateTime()
+
+    class Meta:
+        ordered = True
+        fields = ('id', 'title', 'director', 'genre',
+                  'runtime', 'release_year', 'date_logged')
+
+
+movielog_movie_schema = MovieLogMovieSchema()
+movielog_movies_schema = MovieLogMovieSchema(many=True)
