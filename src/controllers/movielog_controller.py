@@ -38,7 +38,7 @@ def add_movie_to_movielog(user_id, movie_id):
     movie = Movie.query.get(movie_id)
     if not movie:
         return jsonify(message="Movie not found."), 404
-    
+
     if movie in movielog.movies:
         return jsonify(message="Movie is already in the movielog"), 409
 
@@ -53,6 +53,7 @@ def add_movie_to_movielog(user_id, movie_id):
         db.session.rollback()
         return jsonify(message="Movie already in movielog"), 400
 
+
 @movielogs_bp.route("/movies/<int:movie_id>/", methods=["DELETE"])
 def remove_movie_from_movielog(user_id, movie_id):
     '''DELETE endpoint/handler for removing a movie from a user's movielog'''
@@ -65,10 +66,10 @@ def remove_movie_from_movielog(user_id, movie_id):
 
     if not movie:
         return jsonify(message="Movie not found"), 404
-    
+
     if movie not in movielog.movies:
         return jsonify(message="Movie not found in movielog to remove"), 400
-    
+
     movielog.movies.remove(movie)
 
     try:
@@ -78,5 +79,5 @@ def remove_movie_from_movielog(user_id, movie_id):
     except Exception as error:
         db.session.rollback()
         return jsonify(message=str(error)), 500
-    
+
 # NOTE: WILL NEED TO REVISIT THIS CONTROLLER TO CLEAN AND TIGHTEN UP THE LOGIC, ADD VALIDATION, ADD MORE COMMENTS ETC.
