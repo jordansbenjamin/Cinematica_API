@@ -15,3 +15,7 @@ def get_ratings(user_id):
     response = ratings_schema.dump(ratings)
     # Returns the serialised data into JSON format for response
     return jsonify(response)
+
+@ratings_bp.route("/movies/<int:movie_id>/", methods=["POST"])
+def add_movie_rating(user_id, movie_id):
+    pass
