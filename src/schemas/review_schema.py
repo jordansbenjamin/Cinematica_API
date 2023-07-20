@@ -1,5 +1,5 @@
 from main import ma
-
+from schemas.movie_schema import MovieSchema
 
 class ReviewSchema(ma.Schema):
     class Meta:
@@ -9,8 +9,10 @@ class ReviewSchema(ma.Schema):
         fields = [
             'id',
             'review_text',
-            'review_date'
+            'review_date',
+            'movie'
         ]
+    movie = ma.Nested(MovieSchema)
 
 # Singular review schema instance for retreiving a single review
 review_schema = ReviewSchema()
