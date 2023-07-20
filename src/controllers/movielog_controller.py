@@ -38,6 +38,9 @@ def add_movie_to_movielog(user_id, movie_id):
     movie = Movie.query.get(movie_id)
     if not movie:
         return jsonify(message="Movie not found."), 404
+    
+    if movie in movielog.movies:
+        return jsonify(message="Movie is already in the movielog"), 409
 
     # Add the movie to the movielog if all else is successful
     movielog.movies.append(movie)
@@ -75,3 +78,5 @@ def remove_movie_from_movielog(user_id, movie_id):
     except Exception as error:
         db.session.rollback()
         return jsonify(message=str(error)), 500
+    
+# NOTE: WILL NEED TO REVISIT THIS CONTROLLER TO CLEAN AND TIGHTEN UP THE LOGIC, ADD VALIDATION, ADD MORE COMMENTS ETC.
