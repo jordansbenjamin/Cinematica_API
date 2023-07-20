@@ -25,7 +25,7 @@ def get_ratings(user_id):
 
 @ratings_bp.route("/movies/<int:movie_id>/", methods=["POST"])
 def add_movie_rating(user_id, movie_id):
-    '''POST endpoint/handler for adding a movie rating for the specified user'''
+    '''POST endpoint/handler for adding a movie rating of the specified user'''
 
     rating_body_data = rating_schema.load(request.json)
 
@@ -40,6 +40,11 @@ def add_movie_rating(user_id, movie_id):
 
     if existing_rating:
         return jsonify(message="Movie already rated"), 409
+    
+    rating_score = rating_body_data.get("rating_score")
+
+    if not 1 <= rating_score <= 5:
+        return jsonify(message="Invalid rating. Rating should be between 1 and 5."), 400
 
     # Create new rating instance
     new_rating = Rating(
@@ -59,6 +64,7 @@ def add_movie_rating(user_id, movie_id):
 
 @ratings_bp.route("/movies/<int:movie_id>/", methods=["PUT"])
 def update_movie_rating(user_id, movie_id):
+    '''PUT endpoint/handler for updating a movie's rating of the specified user'''
     rating_body_data = rating_schema.load(request.json)
 
     existing_rating = Rating.query.filter_by(
@@ -77,7 +83,7 @@ def update_movie_rating(user_id, movie_id):
 
 @ratings_bp.route("/movies/<int:movie_id>/", methods=["DELETE"])
 def remove_movie_rating(user_id, movie_id):
-
+    '''DELETE endpoint/handler for removing a movie rating of the specified user'''
     existing_rating = Rating.query.filter_by(
         user_id=user_id, movie_id=movie_id).first()
 
