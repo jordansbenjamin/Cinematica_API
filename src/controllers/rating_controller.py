@@ -34,8 +34,9 @@ def add_movie_rating(user_id, movie_id):
 
     if not movie:
         return jsonify(message="Movie not found"), 404
-    
-    existing_rating = Rating.query.filter_by(user_id=user_id, movie_id=movie_id).first()
+
+    existing_rating = Rating.query.filter_by(
+        user_id=user_id, movie_id=movie_id).first()
 
     if existing_rating:
         return jsonify(message="Movie already rated"), 409
@@ -56,3 +57,19 @@ def add_movie_rating(user_id, movie_id):
     return jsonify(response), 201
 
 
+@ratings_bp.route("/movies/<int:movie_id>/", methods=["PUT"])
+def update_movie_rating(user_id, movie_id):
+    rating_body_data = rating_schema.load(request.json)
+
+    existing_rating = Rating.query.filter_by(
+        user_id=user_id, movie_id=movie_id).first()
+
+    if not existing_rating:
+        return jsonify(message="No existing rating found for this movie by this user.")
+
+    existing_rating.rating_score = rating_body_data["rating_score"]
+
+    db.session.commit()
+    
+    response = rating_schema.dump(existing_rating)
+    return jsonify(response), 200
