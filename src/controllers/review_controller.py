@@ -22,6 +22,7 @@ def get_reviews(user_id):
     # Returns the serialised data into JSON format for response
     return jsonify(response)
 
+
 @reviews_bp.route("/movies/<int:movie_id>/", methods=["POST"])
 def create_review(user_id, movie_id):
     review_body_data = review_schema.load(request.json)
@@ -31,16 +32,17 @@ def create_review(user_id, movie_id):
     if not movie:
         return jsonify(message="Movie not found."), 404
 
-    existing_review = Review.query.filter_by(user_id=user_id, movie_id=movie_id).first()
+    existing_review = Review.query.filter_by(
+        user_id=user_id, movie_id=movie_id).first()
 
     if existing_review:
         return jsonify(message="Review already exists for this movie."), 409
-    
+
     # Create new review instance
     new_review = Review(
-        review_text = review_body_data["review_text"],
-        user_id = user_id,
-        movie_id =movie_id
+        review_text=review_body_data["review_text"],
+        user_id=user_id,
+        movie_id=movie_id
     )
 
     db.session.add(new_review)
@@ -48,6 +50,7 @@ def create_review(user_id, movie_id):
 
     response = review_schema.dump(new_review)
     return jsonify(response), 201
+
 
 @reviews_bp.route("/movies/<int:movie_id>/", methods=["PUT"])
 def update_review(user_id, movie_id):
@@ -57,12 +60,12 @@ def update_review(user_id, movie_id):
 
     if not movie:
         return jsonify(message="Movie not found."), 404
-    
+
     review = Review.query.filter_by(user_id=user_id, movie_id=movie_id).first()
 
     if not review:
         return jsonify(message="Review not found"), 404
-    
+
     review.review_text = review_body_data["review_text"]
 
     db.session.commit()
@@ -70,3 +73,22 @@ def update_review(user_id, movie_id):
     response = review_schema.dump(review)
 
     return jsonify(message="Review sucessfully updated!", review=response), 200
+
+
+@reviews_bp.route("/movies/<int:movie_id>/", methods=["DELETE"])
+def delete_review(user_id, movie_id):
+    movie = Movie.query.get(movie_id)
+
+    if not movie:
+        return jsonify(message="Movie not found."), 404
+
+    review = Review.query.filter_by(user_id=user_id, movie_id=movie_id).first()
+
+    if not review:
+        return jsonify(message="Review not found."), 404
+
+    db.session.delete(review)
+    db.session.commit()
+
+    response = review_schema.dump(review)
+    return jsonify(message="Review successfully removed!", review=response), 200
