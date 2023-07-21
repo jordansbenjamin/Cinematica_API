@@ -12,6 +12,10 @@ def get_reviews(user_id):
     # Queries review instance from the DB
     reviews = Review.query.filter_by(user_id=user_id).all()
     # Serialises queried review instances from DB with marshmallow schema into Python DST
-    result = reviews_schema.dump(reviews)
+
+    if len(reviews) < 1:
+        return jsonify(message="No reviews found, you have not reviewed a movie."), 404
+
+    response = reviews_schema.dump(reviews)
     # Returns the serialised data into JSON format for response
-    return jsonify(result)
+    return jsonify(response)
