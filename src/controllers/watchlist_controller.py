@@ -20,9 +20,9 @@ def get_watchlists(user_id):
         return jsonify(message="No watchlist found for this user"), 404
 
     # Serialises queried watchlist instance from DB with marshmallow schema into Python DST
-    result = watchlist_schema.dump(watchlist)
+    response = watchlist_schema.dump(watchlist)
     # Returns the serialised data into JSON format for response
-    return jsonify(result), 200
+    return jsonify(response), 200
 
 
 @watchlists_bp.route("/", methods=["POST"])
