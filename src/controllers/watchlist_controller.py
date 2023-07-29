@@ -56,15 +56,9 @@ def add_movie_to_watchlist(user_id, movie_id):
         return jsonify(message="Movie already in watchlist"), 400
 
 
-@watchlists_bp.route("/", methods=["DELETE"])
-def delete_movie_from_watchlist(user_id):
+@watchlists_bp.route("/movies/<int:movie_id>", methods=["DELETE"])
+def delete_movie_from_watchlist(user_id, movie_id):
     '''DELETE endpoint/handler for removing a movie from a user's watchlist'''
-
-    # Fetch incoming request data
-    data = request.get_json()
-
-    # Get the movie id from the request data
-    movie_id = data.get('movie_id')
 
     # Get the user's watchlist
     watchlist = Watchlist.query.filter_by(user_id=user_id).first()
