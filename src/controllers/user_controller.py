@@ -53,7 +53,11 @@ def get_one_user(user_id):
 def create_user():
     '''POST endpoint/handler for creating/registering a new user'''
     # NOTE: Use exception handling to validate the fields loaded from the request body is provided
-    user_body_data = user_schema.load(request.json)
+    try:
+        user_body_data = user_schema.load(request.json)
+    except ValidationError as error:
+        return jsonify(error.messages), 400
+    
     # Queries existing email from user_body_data email field
     existing_email = User.query.filter_by(
         email=user_body_data["email"]).first()
