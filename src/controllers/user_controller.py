@@ -23,6 +23,7 @@ users_bp.register_blueprint(ratings_bp, url_prefix='<int:user_id>/ratings')
 @users_bp.route("/", methods=["GET"])
 def get_all_users():
     '''GET endpoint/handler for fetching all users available in the cinematica app'''
+
     # Queries all user instances from the DB
     users = User.query.all()
     # Serialises queried user instances from DB with marshmallow schema into Python DST
@@ -33,7 +34,8 @@ def get_all_users():
 
 @users_bp.route("/<int:user_id>", methods=["GET"])
 def get_one_user(user_id):
-    '''GET endpoint/handler for fetching single user by id'''
+    '''GET endpoint/handler for fetching single user by ID'''
+
     # Queries first instance of user filtered by ID
     user = User.query.filter_by(id=user_id).first()
 
@@ -44,9 +46,7 @@ def get_one_user(user_id):
         # Returns user information back as JSON
         return jsonify(response), 200
     else:
-        return abort(404, description="User not found")
-        # NOTE: This does the same thing, I'll keep it here for reference
-        # return jsonify(message="User does not exist, please try again"), 404
+        return jsonify(message=f"User with ID of {user_id} cannot be found, please try again"), 404
 
 
 @users_bp.route("/", methods=["POST"])
@@ -57,7 +57,7 @@ def create_user():
         user_body_data = user_schema.load(request.json)
     except ValidationError as error:
         return jsonify(error.messages), 400
-    
+
     # Queries existing email from user_body_data email field
     existing_email = User.query.filter_by(
         email=user_body_data["email"]).first()
