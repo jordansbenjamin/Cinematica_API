@@ -1,5 +1,5 @@
 from main import db
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import IntegrityError
 from models.movie import Movie
 from models.movielog import MovieLog
@@ -52,6 +52,59 @@ def add_movie_to_movielog(user_id, movie_id):
     except IntegrityError:
         db.session.rollback()
         return jsonify(message="Movie already in movielog"), 400
+
+
+@movielogs_bp.route("/movies", methods=["PUT"])
+def bulk_add_movies_to_movielog(user_id):
+    '''PUT endpoint/handler for bulk adding movies to a user's movielog'''
+
+    # Fetch incoming request data
+    data = request.get_json()
+
+    # Validate the data (assuming that data is a list of movie ids)
+    movie_ids = data.get('list_of_movie_ids')
+    if not isinstance(movie_ids, list) or not all(isinstance(i, int) for i in movie_ids):
+        return jsonify(message="Invalid data. Expected a list of movie IDs."), 400
+
+    # Get the user's movielog
+    movielog = MovieLog.query.filter_by(user_id=user_id).first()
+    if not movielog:
+        return jsonify(message="No movielog found for this user"), 404
+
+    movies_data = []
+    already_in_movielog = []
+    for movie_id in movie_ids:
+
+        # Get the movie
+        movie = Movie.query.get(movie_id)
+        if not movie:
+            return jsonify(message=f"Movie with id {movie_id} not found"), 404
+
+        # Check if the movie is already in the movielog
+        if movie in movielog.movies:
+            # Store the movie that's already in movielog
+            already_in_movielog.append(movie_schema.dump(movie))
+            continue  # Skip to the next movie
+
+        # Add the movie to the movielog
+        movielog.movies.append(movie)
+        movies_data.append(movie_schema.dump(movie))
+
+    try:
+        db.session.commit()
+
+        if len(movies_data) < 1:
+            # Include the movie data in the response
+            return jsonify(message="These movies are already in the movielog", movies="No movies added", already_in_movielog=already_in_movielog), 200
+        elif len(movies_data) > 0 and len(already_in_movielog) > 0:
+            # Include the movie data in the response
+            return jsonify(message="Movies added to movielog but some are already exists in the movielog", movies=movies_data, already_in_movielog=already_in_movielog), 200
+        else:
+            # Include the movie data in the response
+            return jsonify(message="Movies added to movielog", movies=movies_data, already_in_movielog=already_in_movielog), 200
+    except Exception as error:
+        db.session.rollback()
+        return jsonify(message=str(error)), 500
 
 
 @movielogs_bp.route("/movies/<int:movie_id>/", methods=["DELETE"])
