@@ -3,6 +3,7 @@ from marshmallow.exceptions import ValidationError
 from main import db, bcrypt
 from models.user import User
 from models.watchlist import Watchlist
+from models.movielog import MovieLog
 from schemas.user_schema import user_schema, users_schema
 from controllers.watchlist_controller import watchlists_bp
 from controllers.movielog_controller import movielogs_bp
@@ -52,10 +53,13 @@ def get_one_user(user_id):
 @users_bp.route("/", methods=["POST"])
 def create_user():
     '''POST endpoint/handler for creating/registering a new user'''
-    # NOTE: Use exception handling to validate the fields loaded from the request body is provided
+
+    # Validating user request body data with schema
     try:
+        # If successful, load the request body data
         user_body_data = user_schema.load(request.json)
     except ValidationError as error:
+        # If fail, return error message
         return jsonify(error.messages), 400
 
     # Queries existing email from user_body_data email field
@@ -67,10 +71,10 @@ def create_user():
 
     # Checks if a user's email is registered
     if existing_email:
-        return abort(409, description="Email already registered, please try again.")
+        return abort(409, description="Email already registered, please try again")
     # Checks if a user's username is registered
     elif existing_username:
-        return abort(409, description="Username already registered, please try again.")
+        return abort(409, description="Username already registered, please try again")
 
     # Creates new user instance
     new_user = User(
@@ -80,21 +84,24 @@ def create_user():
             user_body_data.get("password")).decode("utf-8")
     )
 
-    # Add new user instance to db and commit
+    # Add new user instance to db
     db.session.add(new_user)
+    # Commit user in order to associate watchlist and movielog
     db.session.commit()
 
-    # TESTING:
+    # Newly registered users will have a watchlist and movielog created for them automatically
     # Creates new watchlist instance for the user
     new_watchlist = Watchlist(user_id=new_user.id)
+    # Creates new movielog instance for the user
+    new_movielog = MovieLog(user_id=new_user.id)
 
-    # Add new watchlist instance to db and commit
-    db.session.add(new_watchlist)
+    # Add new watchlist movielog instances to db and commit
+    db.session.add_all([new_watchlist, new_movielog])
     db.session.commit()
 
     # Returns new user information as a JSON respone
     response = user_schema.dump(new_user)
-    return jsonify(response), 201
+    return jsonify(message="You have sucessfully registered!", new_user=response), 201
 
 
 @users_bp.route("/<int:user_id>", methods=["PUT"])
