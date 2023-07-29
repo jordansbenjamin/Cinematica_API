@@ -25,20 +25,10 @@ def get_watchlists(user_id):
     return jsonify(response), 200
 
 
-@watchlists_bp.route("/", methods=["POST"])
-def add_movie_to_watchlist(user_id):
+@watchlists_bp.route("/movies/<int:movie_id>", methods=["POST"])
+def add_movie_to_watchlist(user_id, movie_id):
     '''POST endpoint/handler for adding a movie to a user's watchlist'''
-    # Fetch the incoming request data
-    data = request.get_json()
-
-    # Validate the data
-    errors = add_movie_to_watchlist_schema.validate(data)
-    if errors:
-        return jsonify(errors), 400
-
-    # Get the movie id
-    movie_id = data.get('movie_id')
-
+    
     # Get the user's watchlist
     watchlist = Watchlist.query.filter_by(user_id=user_id).first()
     if not watchlist:
@@ -48,6 +38,9 @@ def add_movie_to_watchlist(user_id):
     movie = Movie.query.get(movie_id)
     if not movie:
         return jsonify(message="Movie not found"), 404
+    
+    if movie in watchlist.movies:
+        return jsonify(message="Movie is already in the watchlist"), 409
 
     # Add the movie to the watchlist
     watchlist.movies.append(movie)
