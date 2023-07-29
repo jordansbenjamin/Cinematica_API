@@ -20,24 +20,14 @@ def get_watchlists(user_id):
         return jsonify(message="No watchlist found for this user"), 404
 
     # Serialises queried watchlist instance from DB with marshmallow schema into Python DST
-    result = watchlist_schema.dump(watchlist)
+    response = watchlist_schema.dump(watchlist)
     # Returns the serialised data into JSON format for response
-    return jsonify(result), 200
+    return jsonify(response), 200
 
 
-@watchlists_bp.route("/", methods=["POST"])
-def add_movie_to_watchlist(user_id):
+@watchlists_bp.route("/movies/<int:movie_id>", methods=["POST"])
+def add_movie_to_watchlist(user_id, movie_id):
     '''POST endpoint/handler for adding a movie to a user's watchlist'''
-    # Fetch the incoming request data
-    data = request.get_json()
-
-    # Validate the data
-    errors = add_movie_to_watchlist_schema.validate(data)
-    if errors:
-        return jsonify(errors), 400
-
-    # Get the movie id
-    movie_id = data.get('movie_id')
 
     # Get the user's watchlist
     watchlist = Watchlist.query.filter_by(user_id=user_id).first()
@@ -48,6 +38,9 @@ def add_movie_to_watchlist(user_id):
     movie = Movie.query.get(movie_id)
     if not movie:
         return jsonify(message="Movie not found"), 404
+
+    if movie in watchlist.movies:
+        return jsonify(message="Movie is already in the watchlist"), 409
 
     # Add the movie to the watchlist
     watchlist.movies.append(movie)
@@ -63,15 +56,62 @@ def add_movie_to_watchlist(user_id):
         return jsonify(message="Movie already in watchlist"), 400
 
 
-@watchlists_bp.route("/", methods=["DELETE"])
-def delete_movie_from_watchlist(user_id):
-    '''DELETE endpoint/handler for removing a movie from a user's watchlist'''
+@watchlists_bp.route("/movies", methods=["PUT"])
+def bulk_add_movies_to_watchlist(user_id):
+    '''PUT endpoint/handler for bulk adding movies to a user's watchlist'''
 
     # Fetch incoming request data
     data = request.get_json()
 
-    # Get the movie id from the request data
-    movie_id = data.get('movie_id')
+    # Validate the data (assuming that data is a list of movie ids)
+    movie_ids = data.get('list_of_movie_ids')
+    if not isinstance(movie_ids, list) or not all(isinstance(i, int) for i in movie_ids):
+        return jsonify(message="Invalid data. Expected a list of movie IDs."), 400
+
+    # Get the user's watchlist
+    watchlist = Watchlist.query.filter_by(user_id=user_id).first()
+    if not watchlist:
+        return jsonify(message="No watchlist found for this user"), 404
+
+    movies_data = []
+    already_in_watchlist = []
+    for movie_id in movie_ids:
+
+        # Get the movie
+        movie = Movie.query.get(movie_id)
+        if not movie:
+            return jsonify(message=f"Movie with id {movie_id} not found"), 404
+
+        # Check if the movie is already in the watchlist
+        if movie in watchlist.movies:
+            already_in_watchlist.append(movie_schema.dump(movie))  # Store the movie that's already in watchlist
+            continue  # Skip to the next movie
+
+        # Add the movie to the watchlist
+        watchlist.movies.append(movie)
+        movies_data.append(movie_schema.dump(movie))
+
+    try:
+        db.session.commit()
+
+        if len(movies_data) < 1:
+            # Include the movie data in the response
+            return jsonify(message="These movies are already in the watchlist", movies="No movies added", already_in_watchlist=already_in_watchlist), 200
+        elif len(movies_data) > 0 and len(already_in_watchlist) > 0:
+            # Include the movie data in the response
+            return jsonify(message="Movies added to watchlist but some are already exists in the watchlist", movies=movies_data, already_in_watchlist=already_in_watchlist), 200
+        else:
+            # Include the movie data in the response
+            return jsonify(message="Movies added to watchlist", movies=movies_data, already_in_watchlist=already_in_watchlist), 200
+    except Exception as error:
+        db.session.rollback()
+        return jsonify(message=str(error)), 500
+
+
+
+@watchlists_bp.route("/movies/<int:movie_id>", methods=["DELETE"])
+def delete_movie_from_watchlist(user_id, movie_id):
+    '''DELETE endpoint/handler for removing a movie from a user's watchlist'''
 
     # Get the user's watchlist
     watchlist = Watchlist.query.filter_by(user_id=user_id).first()
