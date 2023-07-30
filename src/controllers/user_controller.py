@@ -72,10 +72,10 @@ def create_user():
 
     # Checks if a user's email is registered
     if existing_email:
-        return abort(409, description=f"Email of {existing_email} already registered, please try again")
+        return abort(409, description=f"Email of {existing_email.email} already registered, please try again")
     # Checks if a user's username is registered
     elif existing_username:
-        return abort(409, description=f"Username of {existing_username} already registered, please try again")
+        return abort(409, description=f"Username of {existing_username.username} already registered, please try again")
 
     # Creates new user instance
     new_user = User(
@@ -112,8 +112,11 @@ def update_user(user_id):
 
     # Queries user from DB
     user = User.query.filter_by(id=user_id).first()
+    if not user:
+        jsonify(
+            message=f"User with ID of {user_id} cannot be found, please try again"), 404
     # Checks if the user_id matches
-    if user.id != user_id:
+    elif user.id != user_id:
         return jsonify(message="You are not authorised to update or make changes to this user."), 401
 
     # Validating user request body data with schema
@@ -155,7 +158,7 @@ def update_user(user_id):
 
         # If the same username already exist then return error
         if existing_username:
-            return jsonify(message=f"Username of {existing_username} is already registered."), 409
+            return jsonify(message=f"Username of {existing_username.username} is already registered."), 409
         # Else update the users registered username with the new username passed in to the body data
         else:
             user.username = new_username
@@ -179,11 +182,10 @@ def update_user(user_id):
         "password": update_password
     }
 
+    # Loops through updates dict to call func for updating user data
     for field, update_func in updates.items():
         if field in user_body_data:
-            result = update_func(user, user_body_data[field])
-            if result is not None:
-                return result
+            update_func(user, user_body_data[field])
 
     db.session.commit()
     response = user_schema.dump(user)
@@ -195,6 +197,9 @@ def delete_user(user_id):
     '''DELETE endpoint for deleting specified user'''
     # Queries user from DB
     user = User.query.filter_by(id=user_id).first()
+    # Checks if the user_id matches
+    if user.id != user_id:
+        return jsonify(message="You are not authorised to delete this user."), 401
     # Checks if user exists
     if user:
         # Save user data before deleting
@@ -202,12 +207,8 @@ def delete_user(user_id):
         # If user exist, then delete user instance from DB
         db.session.delete(user)
         db.session.commit()
-        # Create custom response message
-        response = {
-            "message": "User sucessfully deleted!",
-            "user": user_data
-        }
-        return jsonify(response), 200
+
+        return jsonify(message="User sucessfully deleted!", user=user_data)
     else:
         # Responds with 404 message otherwise
-        return abort(404, description="User not found.")
+        return jsonify(message=f"User of ID {user_id} not found."), 404
