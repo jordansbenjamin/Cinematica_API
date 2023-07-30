@@ -23,14 +23,15 @@ class UserSchema(ma.Schema):
         load_only = ["email", "password"]
 
     # Validating email
-    email = ma.String(validate=validate.Email(error=email_error_msg))
+    email = ma.String(
+        required=True, error_messages={"required": "Email is required."},  validate=validate.Email(error=email_error_msg))
 
     # Validating username length and characters with regex
-    username = ma.String(validate=[validate.Length(
+    username = ma.String(required=True, error_messages={"required": "Username is required."}, validate=[validate.Length(
         min=3, max=25, error=username_error_msg), validate.Regexp(r'^[a-zA-Z0-9_]+$', error=username_regx_error_msg)])
 
     # Validating password length and characters with regex
-    password = ma.String(validate=[validate.Length(
+    password = ma.String(required=True, error_messages={"required": "Password is required."}, validate=[validate.Length(
         min=6, max=25, error=pw_error_msg), validate.Regexp(r'^\S*$', error=pw_regx_error_msg)])
 
 
