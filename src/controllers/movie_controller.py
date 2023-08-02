@@ -27,7 +27,7 @@ def get_movie(movie_id):
     # Checks to see if movie exists
     if not movie:
         # If movie doesn't exist, then return abort message
-        return abort(404, description="Movie not found.")
+        return jsonify(description="Movie not found."), 404
     # Returns jsonified response
     response = movie_schema.dump(movie)
     return jsonify(response), 200
