@@ -13,10 +13,10 @@ watchlist_movie_association = db.Table('watchlist_movie_association',
                                            'watchlists.id'), primary_key=True),
                                        db.Column('movie_id', db.Integer, db.ForeignKey(
                                            'movies.id'), primary_key=True),
-                                       db.Column('date_added', db.DateTime(),
+                                       db.Column('date_added', db.Date(),
                                                  nullable=False, default=datetime.utcnow)
                                        )
 
 # This is the association (also known as junction or join) table for the Movies and MovieLog models.
 movielog_movie_association = db.Table('movielog_movie_association', db.Column(
-    'movielog_id', db.Integer, db.ForeignKey('movielogs.id'), primary_key=True), db.Column('movie_id', db.Integer, db.ForeignKey('movies.id'), primary_key=True), db.Column('date_logged', db.DateTime(), nullable=False, default=datetime.utcnow))
+    'movielog_id', db.Integer, db.ForeignKey('movielogs.id'), primary_key=True), db.Column('movie_id', db.Integer, db.ForeignKey('movies.id'), primary_key=True), db.Column('date_logged', db.Date(), nullable=False, default=datetime.utcnow))
