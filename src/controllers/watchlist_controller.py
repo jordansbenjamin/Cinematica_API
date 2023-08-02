@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from models.watchlist import Watchlist
 from models.movie import Movie
 from schemas.movie_schema import movie_schema
-from schemas.watchlist_schema import watchlist_schema, add_movie_to_watchlist_schema
+from schemas.watchlist_schema import watchlist_schema
 
 # Initialises flask blueprint for watchlists, prefix is nested and registered with users bp
 watchlists_bp = Blueprint('watchlists', __name__)
