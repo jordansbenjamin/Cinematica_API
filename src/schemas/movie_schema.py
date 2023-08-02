@@ -1,6 +1,5 @@
 from main import ma
-from marshmallow import fields
-
+from marshmallow import fields, validate
 
 class MovieSchema(ma.Schema):
     class Meta:
@@ -15,6 +14,12 @@ class MovieSchema(ma.Schema):
             'runtime',
             'release_year'
         ]
+    
+    title = ma.String(required=True, validate=validate.Length(min=1, max=60))
+    director = ma.String(required=True, validate=validate.Length(min=1, max=50))
+    genre = ma.String(required=True, validate=validate.Length(max=50))
+    runtime = ma.String(required=True, validate=validate.Regexp(r'^\d+\smin$'))
+    release_year = ma.Integer(required=True, validate=validate.Range(min=1899))
 
 
 # Singular movie schema instance for retreiving a single movie
@@ -24,13 +29,13 @@ movies_schema = MovieSchema(many=True)
 
 
 class WatchlistMovieSchema(ma.Schema):
-    id = fields.Int()
-    title = fields.Str()
-    director = fields.Str()
-    genre = fields.Str()
-    runtime = fields.Str()
-    release_year = fields.Int()
-    date_added = fields.DateTime()
+    # id = fields.Int()
+    # title = fields.Str()
+    # director = fields.Str()
+    # genre = fields.Str()
+    # runtime = fields.Str()
+    # release_year = fields.Int()
+    date_added = fields.Date()
 
     class Meta:
         ordered = True
@@ -44,7 +49,7 @@ watchlist_movies_schema = WatchlistMovieSchema(many=True)
 
 class MovieLogMovieSchema(ma.Schema):
     # TESTING: To see if it works without specifying class variables like the watchlistmovieschema
-    date_logged = fields.DateTime()
+    date_logged = fields.Date()
 
     class Meta:
         ordered = True
