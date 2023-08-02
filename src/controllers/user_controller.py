@@ -112,6 +112,7 @@ def update_user(user_id):
 
     # Queries user from DB
     user = User.query.filter_by(id=user_id).first()
+    # Checks to see if user exists
     if not user:
         jsonify(
             message=f"User with ID of {user_id} cannot be found, please try again"), 404
@@ -185,7 +186,9 @@ def update_user(user_id):
     # Loops through updates dict to call func for updating user data
     for field, update_func in updates.items():
         if field in user_body_data:
-            update_func(user, user_body_data[field])
+            result = update_func(user, user_body_data[field])
+            if result is not None:
+                return result
 
     db.session.commit()
     response = user_schema.dump(user)
