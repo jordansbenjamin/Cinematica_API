@@ -73,7 +73,7 @@ def add_movie_to_movielog(user_id, movie_id):
         return jsonify(message=f"{movie.title} is already in this movielog"), 409
 
 
-@movielogs_bp.route("/movies", methods=["PUT"])
+@movielogs_bp.route("/movies", methods=["PUT", "PATCH"])
 def bulk_add_movies_to_movielog(user_id):
     '''PUT endpoint/handler for bulk adding movies to a user's movielog'''
 
@@ -147,13 +147,13 @@ def remove_movie_from_movielog(user_id, movie_id):
     movielog = MovieLog.query.filter_by(user_id=user_id).first()
     # Checks if the movielog exists for the user
     if not movielog:
-        return jsonify(message="Movielog not found for this user"), 404
+        return jsonify(message=f"No watchlist found for user with ID of {user_id}"), 404
 
     # Query the movie from DB based on movie_id
     movie = Movie.query.get(movie_id)
     # Check is the movie exists
     if not movie:
-        return jsonify(message="Movie not found"), 404
+        return jsonify(message=f"Movie with ID {movie_id} cannot be found, please try again"), 404
 
     # Checks if the movie is in the movielog
     if movie not in movielog.movies:
@@ -167,7 +167,7 @@ def remove_movie_from_movielog(user_id, movie_id):
         db.session.commit()
         movie_data = movie_schema.dump(movie)
         # Include the movie data in the response
-        return jsonify(message="Movie successfully removed from movielog!", movie=movie_data), 200
+        return jsonify(message=f"{movie.title} successfully removed from movielog!", movie=movie_data), 200
     except Exception as error:
         # Rollback the session and changes made if there is an error
         db.session.rollback()

@@ -156,7 +156,7 @@ def delete_movie_from_watchlist(user_id, movie_id):
 
     # Check if the movie is in the watchlist
     if movie not in watchlist.movies:
-        return jsonify(message="Movie not in watchlist"), 400
+        return jsonify(message="Movie not found in watchlist to remove"), 400
 
     # Remove the movie from the watchlist
     watchlist.movies.remove(movie)
