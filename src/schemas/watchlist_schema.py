@@ -7,8 +7,8 @@ MOVIE_ID_ERR_MSG = "List of movie ID's must not be empty"
 
 
 class WatchlistSchema(ma.Schema):
-    watchlist_id = fields.Integer(attribute="id")
-    movies = fields.Nested(WatchlistMovieSchema, many=True, attribute="movies")
+    watchlist_id = ma.Integer(attribute="id")
+    movies = ma.Nested(WatchlistMovieSchema, many=True, attribute="movies")
 
     class Meta:
         # Orders the fields in the way they are defined in the schema when serialising or deserialising
@@ -26,7 +26,7 @@ watchlist_schema = WatchlistSchema()
 
 class BulkAddMoviesSchema(ma.Schema):
 
-    list_of_movie_ids = fields.List(fields.Integer(), required=True)
+    list_of_movie_ids = ma.List(ma.Integer(), required=True)
 
     @validates('list_of_movie_ids')
     def validate_movie_ids(self, value):

@@ -33,8 +33,9 @@ def get_watchlist(user_id):
     for movie_data in response['movies']:
         date_added = db.session.query(watchlist_movie_association.c.date_added)\
             .filter(watchlist_movie_association.c.watchlist_id == watchlist.id)\
-            .filter(watchlist_movie_association.c.movie_id == movie_data['id']).first()
-        movie_data['added_to_watchlist'] = date_added[0].strftime("%Y-%m-%d") if date_added else None
+            .filter(watchlist_movie_association.c.movie_id == movie_data['movie_id']).first()
+        movie_data['added_to_watchlist'] = date_added[0].strftime(
+            "%Y-%m-%d") if date_added else None
 
     # Returns the serialised data into JSON format for response
     return jsonify(response), 200
