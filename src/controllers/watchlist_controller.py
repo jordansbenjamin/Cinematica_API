@@ -20,7 +20,7 @@ def get_watchlist(user_id):
     # Queries watchlist instance from the DB
     watchlist = Watchlist.query.filter_by(user_id=user_id).first()
 
-    # Checks if watchlist exists for theuser
+    # Checks if watchlist exists for the user
     if not watchlist:
         return jsonify(message=f"No watchlist found for user with ID of {user_id}"), 404
     # Checks if there is a movie in the watchlist

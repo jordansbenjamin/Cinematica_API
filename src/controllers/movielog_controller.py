@@ -3,6 +3,7 @@ from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import IntegrityError
 from models.movie import Movie
 from models.movielog import MovieLog
+from models.associations import movielog_movie_association
 from schemas.movie_schema import movie_schema
 from schemas.movielog_schema import movielog_schema
 from schemas.bulk_add_movies_schema import bulk_add_movies_schema
@@ -14,12 +15,30 @@ movielogs_bp = Blueprint('movielogs', __name__)
 @movielogs_bp.route("/", methods=["GET"])
 def get_movielogs(user_id):
     '''GET endpoint/handler for fetching specified users movielog available in the cinematica app'''
+
     # Queries movielog instance from the DB
     movielog = MovieLog.query.filter_by(user_id=user_id).first()
+
+    # Checks if movielog exists for the user
+    if not movielog:
+        return jsonify(message=f"No movielog found for user with ID of {user_id}"), 404
+    # Checks if there is a movie in the movielog
+    elif len(movielog.movies) < 1:
+        return jsonify(message="No movies found in this movielog, please add a movie")
+
     # Serialises queried movielog instance from DB with marshmallow schema into Python DST
-    result = movielog_schema.dump(movielog)
+    response = movielog_schema.dump(movielog)
+
+    # Fetch date_logged field from the association table
+    for movie_data in response['movies']:
+        date_logged = db.session.query(movielog_movie_association.c.date_logged)\
+            .filter(movielog_movie_association.c.movielog_id == movielog.id)\
+            .filter(movielog_movie_association.c.movie_id == movie_data['movie_id']).first()
+        movie_data['added_to_movielog'] = date_logged[0].strftime(
+            "%d-%m-%Y") if date_logged else None
+
     # Returns the serialised data into JSON format for response
-    return jsonify(result)
+    return jsonify(response), 200
 
 
 @movielogs_bp.route("/movies/<int:movie_id>/", methods=["POST"])
