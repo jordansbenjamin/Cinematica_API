@@ -36,7 +36,7 @@ def get_watchlist(user_id):
             .filter(watchlist_movie_association.c.watchlist_id == watchlist.id)\
             .filter(watchlist_movie_association.c.movie_id == movie_data['movie_id']).first()
         movie_data['added_to_watchlist'] = date_added[0].strftime(
-            "%Y-%m-%d") if date_added else None
+            "%d-%m-%Y") if date_added else None
 
     # Returns the serialised data into JSON format for response
     return jsonify(response), 200
@@ -65,13 +65,12 @@ def add_movie_to_watchlist(user_id, movie_id):
         # Commit changes to DB & serialise movie for response
         db.session.commit()
         movie_data = movie_schema.dump(movie)
-
         # Include the movie data in the response
         return jsonify(message=f"{movie.title} added to watchlist", movie=movie_data), 200
     except IntegrityError:
         # Rollback the session if the movie already exists in the watchlist
         db.session.rollback()
-        return jsonify(message=f"{movie.title} is already in watchlist"), 409
+        return jsonify(message=f"{movie.title} is already in this watchlist"), 409
 
 
 @watchlists_bp.route("/movies", methods=["PUT"])
@@ -102,7 +101,7 @@ def bulk_add_movies_to_watchlist(user_id):
     # Iterate movies from list of movie id's
     for movie_id in movie_ids:
 
-        # Query movie from DB based on movie id
+        # Query movie from DB based on movie ID
         movie = Movie.query.get(movie_id)
         # Checks if the movie exists
         if not movie:
@@ -135,6 +134,7 @@ def bulk_add_movies_to_watchlist(user_id):
     except Exception as error:
         # Rollback the session and changes made if there is an error
         db.session.rollback()
+        # Return error message in JSON format
         return jsonify(message=str(error)), 500
 
 
@@ -142,13 +142,13 @@ def bulk_add_movies_to_watchlist(user_id):
 def delete_movie_from_watchlist(user_id, movie_id):
     '''DELETE endpoint/handler for removing a movie from a user's watchlist'''
 
-    # Get the user's watchlist from the DB filtered by user id
+    # Query the user's watchlist from the DB filtered by user_id
     watchlist = Watchlist.query.filter_by(user_id=user_id).first()
     # Checks if the watchlist exists for the user
     if not watchlist:
         return jsonify(message=f"No watchlist found for user with ID of {user_id}"), 404
 
-    # Get the movie from DB based on movie id
+    # Query the movie from DB based on movie_id
     movie = Movie.query.get(movie_id)
     # Check if the move exists
     if not movie:
@@ -165,10 +165,10 @@ def delete_movie_from_watchlist(user_id, movie_id):
         # Commit changes to DB & serialise movie for response
         db.session.commit()
         movie_data = movie_schema.dump(movie)
-
         # Include the movie data in the response
         return jsonify(message=f"{movie.title} sucessfully removed from watchlist", movie=movie_data), 200
     except Exception as error:
         # Rollback the session and changes made if there is an error
         db.session.rollback()
+        # Return error message in JSON format
         return jsonify(message=str(error)), 500
