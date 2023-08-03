@@ -6,7 +6,8 @@ from models.watchlist import Watchlist
 from models.movie import Movie
 from models.associations import watchlist_movie_association
 from schemas.movie_schema import movie_schema
-from schemas.watchlist_schema import watchlist_schema, bulk_add_movies_schema
+from schemas.watchlist_schema import watchlist_schema
+from schemas.bulk_add_movies_schema import bulk_add_movies_schema
 
 # Initialises flask blueprint for watchlists, prefix is nested and registered with users bp
 watchlists_bp = Blueprint('watchlists', __name__)

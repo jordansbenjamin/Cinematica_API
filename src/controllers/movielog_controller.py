@@ -5,6 +5,7 @@ from models.movie import Movie
 from models.movielog import MovieLog
 from schemas.movie_schema import movie_schema
 from schemas.movielog_schema import movielog_schema
+from schemas.bulk_add_movies_schema import bulk_add_movies_schema
 
 # Initialises flask blueprint for movielogs, prefix is nested and registered with users bp
 movielogs_bp = Blueprint('movielogs', __name__)
