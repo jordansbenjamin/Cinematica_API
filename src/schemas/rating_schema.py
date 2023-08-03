@@ -1,8 +1,14 @@
 from main import ma
 from marshmallow import post_dump
-from schemas.movie_schema import MovieSchema
+from marshmallow.validate import Range
+from schemas.movie_schema import minimal_movie_schema
+
+RATING_ERR_MSG = "Rating score must be between 1 and 5 inclusive"
 
 class RatingSchema(ma.Schema):
+    # Nesting MovieSchema in RatingSchema
+    movie = ma.Nested(minimal_movie_schema)
+
     class Meta:
         # Orders the fields in the way they are defined in the schema when serialising or deserialising 
         ordered = True
@@ -13,7 +19,9 @@ class RatingSchema(ma.Schema):
             'rating_date',
             'movie'
         ]
-    movie = ma.Nested(MovieSchema)
+        load_only = ["id"]
+
+    rating_score = ma.Integer(required=True, validate=Range(min=1, max=5), error=RATING_ERR_MSG)
 
     # post_dump decorator will call the format rating func after schema dumps the data
     @post_dump

@@ -81,6 +81,12 @@ movie_schema = MovieSchema()
 # Multiple movies schema instance for retreiving multiple movies
 movies_schema = MovieSchema(many=True)
 
+# Fields to exclude for minimal movie schema instance
+movie_fields_to_exclude = ['director', 'genre', 'runtime', 'release_year']
+
+# Minimal instance of the MovieSchema, excluding the unwanted fields
+minimal_movie_schema = MovieSchema(exclude=movie_fields_to_exclude)
+
 
 class WatchlistMovieSchema(ma.Schema):
     # modifying id attribute for changing id field name
