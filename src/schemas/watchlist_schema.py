@@ -7,6 +7,7 @@ MOVIE_ID_ERR_MSG = "List of movie ID's must not be empty"
 
 
 class WatchlistSchema(ma.Schema):
+    watchlist_id = fields.Integer(attribute="id")
     movies = fields.Nested(WatchlistMovieSchema, many=True, attribute="movies")
 
     class Meta:
@@ -14,7 +15,7 @@ class WatchlistSchema(ma.Schema):
         ordered = True
         # Fields that will be included during serealisation
         fields = [
-            'id',
+            'watchlist_id',
             'movies',
         ]
 

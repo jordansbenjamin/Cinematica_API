@@ -57,12 +57,6 @@ movies_schema = MovieSchema(many=True)
 
 
 class WatchlistMovieSchema(ma.Schema):
-    # id = fields.Int()
-    # title = fields.Str()
-    # director = fields.Str()
-    # genre = fields.Str()
-    # runtime = fields.Str()
-    # release_year = fields.Int()
     date_added = fields.Date()
 
     class Meta:
@@ -72,11 +66,9 @@ class WatchlistMovieSchema(ma.Schema):
 
 
 watchlist_movie_schema = WatchlistMovieSchema()
-watchlist_movies_schema = WatchlistMovieSchema(many=True)
 
 
 class MovieLogMovieSchema(ma.Schema):
-    # TESTING: To see if it works without specifying class variables like the watchlistmovieschema
     date_logged = fields.Date()
 
     class Meta:
@@ -86,4 +78,3 @@ class MovieLogMovieSchema(ma.Schema):
 
 
 movielog_movie_schema = MovieLogMovieSchema()
-movielog_movies_schema = MovieLogMovieSchema(many=True)
