@@ -21,7 +21,7 @@ def get_watchlist(user_id):
 
     # Checks if watchlist exists for theuser
     if not watchlist:
-        return jsonify(message=f"No watchlist found for user of ID {user_id}"), 404
+        return jsonify(message=f"No watchlist found for user with ID of {user_id}"), 404
     # Checks if there is a movie in the watchlist
     elif len(watchlist.movies) < 1:
         return jsonify(message="No movies found in this watchlist, please add a movie")
@@ -49,13 +49,13 @@ def add_movie_to_watchlist(user_id, movie_id):
     watchlist = Watchlist.query.filter_by(user_id=user_id).first()
     # Checks if watchlist exists for the user
     if not watchlist:
-        return jsonify(message=f"No watchlist found for user of ID {user_id}"), 404
+        return jsonify(message=f"No watchlist found for user with ID of {user_id}"), 404
 
     # Query movie from DB based on movie id
     movie = Movie.query.get(movie_id)
     # Checks if the movie exists
     if not movie:
-        return jsonify(message=f"Movie with ID {movie_id} not found"), 404
+        return jsonify(message=f"Movie with ID {movie_id} cannot be found, please try again"), 404
 
     # Add the movie to the watchlist
     watchlist.movies.append(movie)
@@ -92,7 +92,7 @@ def bulk_add_movies_to_watchlist(user_id):
     watchlist = Watchlist.query.filter_by(user_id=user_id).first()
     # Checks if the watchlist exists for the user
     if not watchlist:
-        return jsonify(message=f"No watchlist found for this user with ID of {user_id}"), 404
+        return jsonify(message=f"No watchlist found for user with ID of {user_id}"), 404
 
     # Initialise empty lists
     movies_data = []
@@ -105,7 +105,7 @@ def bulk_add_movies_to_watchlist(user_id):
         movie = Movie.query.get(movie_id)
         # Checks if the movie exists
         if not movie:
-            return jsonify(message=f"Movie with ID {movie_id} not found"), 404
+            return jsonify(message=f"Movie with ID {movie_id} cannot be found, please try again"), 404
 
         # Check if the movie is already in the watchlist
         if movie in watchlist.movies:
@@ -145,13 +145,13 @@ def delete_movie_from_watchlist(user_id, movie_id):
     watchlist = Watchlist.query.filter_by(user_id=user_id).first()
     # Checks if the watchlist exists for the user
     if not watchlist:
-        return jsonify(message="No watchlist found for this user"), 404
+        return jsonify(message=f"No watchlist found for user with ID of {user_id}"), 404
 
     # Get the movie from DB based on movie id
     movie = Movie.query.get(movie_id)
     # Check if the move exists
     if not movie:
-        return jsonify(message="Movie not found"), 404
+        return jsonify(message=f"Movie with ID {movie_id} cannot be found, please try again"), 404
 
     # Check if the movie is in the watchlist
     if movie not in watchlist.movies:
@@ -166,7 +166,7 @@ def delete_movie_from_watchlist(user_id, movie_id):
         movie_data = movie_schema.dump(movie)
 
         # Include the movie data in the response
-        return jsonify(message="Movie sucessfully removed from watchlist", movie=movie_data), 200
+        return jsonify(message=f"{movie.title} sucessfully removed from watchlist", movie=movie_data), 200
     except Exception as error:
         # Rollback the session and changes made if there is an error
         db.session.rollback()

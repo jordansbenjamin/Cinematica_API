@@ -11,6 +11,7 @@ YEAR_ERR_MSG = "Movie must be at least from the year 1900"
 
 
 class MovieSchema(ma.Schema):
+    # modifying id attribute for changing id field name
     movie_id = ma.Integer(attribute="id")
 
     class Meta:
@@ -34,6 +35,7 @@ class MovieSchema(ma.Schema):
 
     @validates('genre')
     def validate_genres(self, value):
+        '''Custom method for validating genre input'''
         # Check if value contains any characters other than letters, spaces, and forward slashes
         if re.search('[^a-zA-Z\s/-]', value):
             raise ValidationError(
@@ -81,7 +83,9 @@ movies_schema = MovieSchema(many=True)
 
 
 class WatchlistMovieSchema(ma.Schema):
+    # modifying id attribute for changing id field name
     movie_id = ma.Integer(attribute="id")
+    # adding date_added field for each movie added into watchlist
     date_added = fields.Date()
 
     class Meta:
