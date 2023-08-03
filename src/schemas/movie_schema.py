@@ -99,12 +99,15 @@ watchlist_movie_schema = WatchlistMovieSchema()
 
 
 class MovieLogMovieSchema(ma.Schema):
+     # modifying id attribute for changing id field name
+    movie_id = ma.Integer(attribute="id")
+    # adding date_logged field for each movie logged into the movielog
     date_logged = fields.Date()
 
     class Meta:
         ordered = True
-        fields = ('id', 'title', 'director', 'genre',
+        fields = ('movie_id', 'title', 'director', 'genre',
                   'runtime', 'release_year', 'date_logged')
 
-
+# Singular movielog movie schema instance for retreiving nested movie information into a users movielog
 movielog_movie_schema = MovieLogMovieSchema()
