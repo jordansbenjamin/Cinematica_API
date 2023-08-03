@@ -5,6 +5,7 @@ from schemas.movie_schema import WatchlistMovieSchema
 
 MOVIE_ID_ERR_MSG = "List of movie ID's must not be empty"
 
+
 class WatchlistSchema(ma.Schema):
     movies = fields.Nested(WatchlistMovieSchema, many=True, attribute="movies")
 
@@ -21,13 +22,15 @@ class WatchlistSchema(ma.Schema):
 # Singular watchlist schema instance for retreiving a single watchlist
 watchlist_schema = WatchlistSchema()
 
+
 class BulkAddMoviesSchema(ma.Schema):
-    
+
     list_of_movie_ids = fields.List(fields.Integer(), required=True)
-    
+
     @validates('list_of_movie_ids')
     def validate_movie_ids(self, value):
         if not value:
             raise ValidationError(MOVIE_ID_ERR_MSG)
-        
+
+
 bulk_add_movies_schema = BulkAddMoviesSchema()

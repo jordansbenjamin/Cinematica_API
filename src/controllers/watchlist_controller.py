@@ -4,6 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from marshmallow.exceptions import ValidationError
 from models.watchlist import Watchlist
 from models.movie import Movie
+from models.associations import watchlist_movie_association
 from schemas.movie_schema import movie_schema
 from schemas.watchlist_schema import watchlist_schema, bulk_add_movies_schema
 
@@ -17,7 +18,7 @@ def get_watchlist(user_id):
 
     # Queries watchlist instance from the DB
     watchlist = Watchlist.query.filter_by(user_id=user_id).first()
-    
+
     # Checks if watchlist exists for theuser
     if not watchlist:
         return jsonify(message=f"No watchlist found for user of ID {user_id}"), 404
@@ -27,6 +28,14 @@ def get_watchlist(user_id):
 
     # Serialises queried watchlist instance from DB with marshmallow schema into Python DST
     response = watchlist_schema.dump(watchlist)
+
+    # Fetch date_added from the association table
+    for movie_data in response['movies']:
+        date_added = db.session.query(watchlist_movie_association.c.date_added)\
+            .filter(watchlist_movie_association.c.watchlist_id == watchlist.id)\
+            .filter(watchlist_movie_association.c.movie_id == movie_data['id']).first()
+        movie_data['date_added_to_watchlist'] = date_added[0] if date_added else None
+
     # Returns the serialised data into JSON format for response
     return jsonify(response), 200
 
@@ -87,7 +96,7 @@ def bulk_add_movies_to_watchlist(user_id):
     # Initialise empty lists
     movies_data = []
     already_in_watchlist = []
-    
+
     # Iterate movies from list of movie id's
     for movie_id in movie_ids:
 
@@ -99,7 +108,8 @@ def bulk_add_movies_to_watchlist(user_id):
 
         # Check if the movie is already in the watchlist
         if movie in watchlist.movies:
-            already_in_watchlist.append(movie_schema.dump(movie))  # Store the movie that's already in watchlist
+            # Store the movie that's already in watchlist
+            already_in_watchlist.append(movie_schema.dump(movie))
             continue  # Skip to the next movie
 
         # Add the movie to the watchlist
@@ -124,7 +134,6 @@ def bulk_add_movies_to_watchlist(user_id):
         # Rollback the session and changes made if there is an error
         db.session.rollback()
         return jsonify(message=str(error)), 500
-
 
 
 @watchlists_bp.route("/movies/<int:movie_id>", methods=["DELETE"])

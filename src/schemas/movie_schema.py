@@ -57,12 +57,12 @@ movies_schema = MovieSchema(many=True)
 
 
 class WatchlistMovieSchema(ma.Schema):
-    # id = fields.Int()
-    # title = fields.Str()
-    # director = fields.Str()
-    # genre = fields.Str()
-    # runtime = fields.Str()
-    # release_year = fields.Int()
+    id = fields.Int()
+    title = fields.Str()
+    director = fields.Str()
+    genre = fields.Str()
+    runtime = fields.Str()
+    release_year = fields.Int()
     date_added = fields.Date()
 
     class Meta:
