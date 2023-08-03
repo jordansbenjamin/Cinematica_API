@@ -2,7 +2,6 @@ from main import db
 from datetime import datetime
 
 
-
 # This is essentially the join table that connects the relationship between the Movies and Watchlists models.
 # It's used because the relationship between these entities is many-to-many, so the association table helps
 # bridge this connection. By bringing in together two foreign keys and making them primary keys in this table,

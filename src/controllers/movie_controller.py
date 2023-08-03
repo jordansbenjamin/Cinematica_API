@@ -36,7 +36,7 @@ def get_movie(movie_id):
 @movies_bp.route("/", methods=["POST"])
 def add_movie():
     '''POST route/handler for creating and adding a new movie'''
-    
+
     # Validating movie request body data with schema
     try:
         # If successful, load the request body data
@@ -44,7 +44,7 @@ def add_movie():
     except ValidationError as error:
         # If fail, return error message
         return jsonify(error.messages), 400
-    
+
     # Queries existing movie filtered by title and director
     existing_movie = Movie.query.filter_by(
         title=movie_body_data['title'], director=movie_body_data['director']).first()
@@ -73,7 +73,7 @@ def add_movie():
 @movies_bp.route("/<int:movie_id>", methods=["PUT"])
 def update_movie(movie_id):
     '''PUT route/handler for updating specified movies info'''
-    
+
     # Queries specified movie from DB
     movie = Movie.query.filter_by(id=movie_id).first()
     # Checks to see if movie exists
