@@ -14,20 +14,24 @@ ratings_bp = Blueprint('ratings', __name__)
 def get_ratings(user_id):
     '''GET endpoint/handler for fetching specified users movie ratings'''
 
-    # Queries rating instance from the DB
-    ratings = Rating.query.filter_by(user_id=user_id).all()
-
     # Query the user using get by user_id from DB
     user = User.query.get(user_id)
 
-    # Checks if there are movies rated
-    if len(ratings) < 1:
-        return jsonify(message=f"No ratings found for user with ID of {user_id}, please rate a movie"), 404
+    # Checks if user exists in DB
+    if user:
+        # Queries rating instance from DB
+        ratings = Rating.query.filter_by(user_id=user_id).all()
 
-    # Prepare ratings_schema for response
-    response = ratings_schema.dump(ratings)
-    # Returns the serialised data into JSON format for response
-    return jsonify(message=f"{len(ratings)} movies rated for {user.username}", ratings=response)
+        # Checks if there are movies rated
+        if len(ratings) < 1:
+            return jsonify(message=f"No ratings found for user with ID of {user_id}, please try again"), 404
+
+        # Serialises queried rating instances from DB with marshmallow schema into Python DST
+        response = ratings_schema.dump(ratings)
+        # Returns the serialised data into JSON format for response
+        return jsonify(message=f"{len(ratings)} movies rated for {user.username}", ratings=response)
+    else:
+        return jsonify(message=f"User with ID of {user_id} cannot be found"), 404
 
 
 @ratings_bp.route("/movies/<int:movie_id>/", methods=["POST"])
@@ -82,7 +86,7 @@ def update_movie_rating(user_id, movie_id):
     except ValidationError as error:
         # If fail, return error message
         return jsonify(error.messages), 400
-    
+
     # Query movie from DB based on movie id
     movie = Movie.query.get(movie_id)
     # Checks if the movie exists
@@ -116,7 +120,7 @@ def remove_movie_rating(user_id, movie_id):
     # Checks if the movie exists
     if not movie:
         return jsonify(message=f"Movie with ID {movie_id} cannot be found, please try again"), 404
-    
+
     # Query an existing rating for a movie from DB filtered by both user_id and movie_id
     existing_rating = Rating.query.filter_by(
         user_id=user_id, movie_id=movie_id).first()
