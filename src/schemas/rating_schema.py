@@ -1,9 +1,10 @@
 from main import ma
-from marshmallow import post_dump
-from marshmallow.validate import Range
+from marshmallow import post_dump, validates
+from marshmallow.exceptions import ValidationError
 from schemas.movie_schema import minimal_movie_schema
 
-RATING_ERR_MSG = "Rating score must be between 1 and 5 inclusive"
+
+RATING_ERR_MSG = "Invalid rating. Rating should be between 1 and 5"
 
 class RatingSchema(ma.Schema):
     # Nesting MovieSchema in RatingSchema
@@ -21,7 +22,13 @@ class RatingSchema(ma.Schema):
         ]
         load_only = ["id"]
 
-    rating_score = ma.Integer(required=True, validate=Range(min=1, max=5), error=RATING_ERR_MSG)
+    rating_score = ma.Integer(required=True)
+    
+    @validates('rating_score')
+    def validate_rating_score(self, value):
+        '''Custom method for validating rating range'''
+        if not 1 <= value <= 5:
+            raise ValidationError(RATING_ERR_MSG)
 
     # post_dump decorator will call the format rating func after schema dumps the data
     @post_dump
