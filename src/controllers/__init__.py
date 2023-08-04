@@ -5,6 +5,7 @@ from controllers.movielog_controller import movielogs_bp
 from controllers.review_controller import reviews_bp
 from controllers.rating_controller import ratings_bp
 from controllers.index_controller import index_bp
+from controllers.auth_controller import auth_bp
 
 registerable_controllers = [
     index_bp,
@@ -14,4 +15,5 @@ registerable_controllers = [
     movielogs_bp,
     reviews_bp,
     ratings_bp,
+    auth_bp
 ]

@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request, abort
+from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
 from marshmallow.exceptions import ValidationError
 from main import db, bcrypt
 from models.user import User
@@ -9,6 +10,7 @@ from controllers.watchlist_controller import watchlists_bp
 from controllers.movielog_controller import movielogs_bp
 from controllers.review_controller import reviews_bp
 from controllers.rating_controller import ratings_bp
+from datetime import timedelta
 
 # Initialises flask blueprint with a /users url prefix
 users_bp = Blueprint('users', __name__, url_prefix="/users")
@@ -96,29 +98,36 @@ def create_user():
     # Creates new movielog instance for the user
     new_movielog = MovieLog(user_id=new_user.id)
 
+    # Access token for JWT authentication
+    token = create_access_token(identity=str(
+        new_user.id), expires_delta=timedelta(days=1))
+
     # Add new watchlist movielog instances to db and commit
     db.session.add_all([new_watchlist, new_movielog])
     db.session.commit()
 
     # Returns new user information as a JSON respone
     response = user_schema.dump(new_user)
-    return jsonify(message="You have sucessfully registered!", new_user=response), 201
+    return jsonify(message="You have sucessfully registered!", new_user=response, token=token, expiry="24 hrs"), 201
 
 
 @users_bp.route("/<int:user_id>", methods=["PUT"])
-# NOTE: Will add jwt_required when auth feature is added
+@jwt_required()
 def update_user(user_id):
     '''PUT endpoint for updating specified user'''
 
+    # Get the ID of the authenticated user
+    authenticated_user_id = get_jwt_identity()
+
+    # Check if the authenticated user's ID matches the user_id from the URL
+    if str(user_id) != authenticated_user_id:
+        return jsonify(message="You are not authorised to update or make changes to this user"), 401
+
     # Queries user from DB
     user = User.query.filter_by(id=user_id).first()
-    # Checks to see if user exists
+    # Checks to see if user exists in the DB
     if not user:
-        jsonify(
-            message=f"User with ID of {user_id} cannot be found, please try again"), 404
-    # Checks if the user_id matches
-    elif user.id != user_id:
-        return jsonify(message="You are not authorised to update or make changes to this user."), 401
+        return jsonify(message=f"User with ID of {user_id} cannot be found, please try again"), 404
 
     # Validating user request body data with schema
     try:
@@ -134,7 +143,7 @@ def update_user(user_id):
 
         # Checks to see if the new email matches with the current email
         if user.email == new_email:
-            return jsonify(message="Cannot update, new email matches with current email, please try another email."), 409
+            return jsonify(message="Cannot update, new email matches with current email, please try another email"), 409
 
         # Queries database by filtering email to find match of user_body_data
         existing_user_email = User.query.filter_by(
@@ -142,7 +151,7 @@ def update_user(user_id):
 
         # If the same email already exist then return error
         if existing_user_email:
-            return jsonify(message="Email is already registered."), 409
+            return jsonify(message="Email is already registered"), 409
         # Else update the users registered email with the new email passed in to the body data
         else:
             user.email = new_email
@@ -196,13 +205,20 @@ def update_user(user_id):
 
 
 @users_bp.route("/<int:user_id>", methods=["DELETE"])
+@jwt_required()
 def delete_user(user_id):
     '''DELETE endpoint for deleting specified user'''
+
+    # Get the ID of the authenticated user
+    authenticated_user_id = get_jwt_identity()
+
+    # Check if the authenticated user's ID matches the user_id from the URL
+    if str(user_id) != authenticated_user_id:
+        return jsonify(message="You are not authorised to make changes to this user"), 401
+
     # Queries user from DB
     user = User.query.filter_by(id=user_id).first()
-    # Checks if the user_id matches
-    if user.id != user_id:
-        return jsonify(message="You are not authorised to delete this user."), 401
+
     # Checks if user exists
     if user:
         # Save user data before deleting
