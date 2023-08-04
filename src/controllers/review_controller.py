@@ -1,5 +1,6 @@
 from main import db
 from flask import Blueprint, request, jsonify
+from marshmallow.exceptions import ValidationError
 from models.review import Review
 from models.movie import Movie
 from models.user import User
@@ -34,7 +35,14 @@ def get_reviews(user_id):
 @reviews_bp.route("/movies/<int:movie_id>/", methods=["POST"])
 def create_review(user_id, movie_id):
     '''POST endpoint/handler for adding a movie review for the specified user'''
-    review_body_data = review_schema.load(request.json)
+
+    # Validating rating request body data with schema
+    try:
+        # If successful, load the request body data
+        review_body_data = review_schema.load(request.json)
+    except ValidationError as error:
+        # If fail, return error message
+        return jsonify(error.messages), 400
 
     movie = Movie.query.get(movie_id)
 
