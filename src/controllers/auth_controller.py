@@ -12,6 +12,7 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 @auth_bp.route("/login", methods=["POST"])
 def auth_login():
     '''POST route for logging in user based on username and password, presenting their token for accessing certain endpoints'''
+
     # Validating user request body data with schema
     try:
         # If successful, load the request body data
