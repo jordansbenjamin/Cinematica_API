@@ -1,6 +1,5 @@
 from main import db
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
 from marshmallow.exceptions import ValidationError
 from models.rating import Rating
 from models.movie import Movie
