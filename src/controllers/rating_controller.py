@@ -1,10 +1,12 @@
 from main import db
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from marshmallow.exceptions import ValidationError
 from models.rating import Rating
 from models.movie import Movie
 from models.user import User
 from schemas.rating_schema import rating_schema, ratings_schema
+from helpers import authenticate_user
 
 # Initialises flask blueprint for ratings, prefix is nested and registered with users bp
 ratings_bp = Blueprint('ratings', __name__)
@@ -35,6 +37,7 @@ def get_ratings(user_id):
 
 
 @ratings_bp.route("/movies/<int:movie_id>/", methods=["POST"])
+@authenticate_user("You are not authorised to add or make changes to this users ratings")
 def add_movie_rating(user_id, movie_id):
     '''POST endpoint/handler for adding a movie rating of the specified user'''
 
@@ -76,6 +79,7 @@ def add_movie_rating(user_id, movie_id):
 
 
 @ratings_bp.route("/movies/<int:movie_id>/", methods=["PUT"])
+@authenticate_user("You are not authorised to update or make changes to this users ratings")
 def update_movie_rating(user_id, movie_id):
     '''PUT endpoint/handler for updating a movie's rating of the specified user'''
 
@@ -112,6 +116,7 @@ def update_movie_rating(user_id, movie_id):
 
 
 @ratings_bp.route("/movies/<int:movie_id>/", methods=["DELETE"])
+@authenticate_user("You are not authorised to remove or make changes to this users ratings")
 def remove_movie_rating(user_id, movie_id):
     '''DELETE endpoint/handler for removing a movie rating of the specified user'''
 
