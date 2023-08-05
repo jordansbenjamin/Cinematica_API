@@ -1,6 +1,5 @@
 from main import db
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.exc import IntegrityError
 from marshmallow.exceptions import ValidationError
 from models.watchlist import Watchlist
@@ -9,12 +8,14 @@ from models.associations import watchlist_movie_association
 from schemas.movie_schema import movie_schema
 from schemas.watchlist_schema import watchlist_schema
 from schemas.bulk_add_movies_schema import bulk_add_movies_schema
+from helpers import authenticate_user, check_user_exists
 
 # Initialises flask blueprint for watchlists, prefix is nested and registered with users bp
 watchlists_bp = Blueprint('watchlists', __name__)
 
 
 @watchlists_bp.route("/", methods=["GET"])
+@check_user_exists
 def get_watchlist(user_id):
     '''GET endpoint/handler for fetching specified users watchlist available in the cinematica app'''
 
@@ -44,16 +45,10 @@ def get_watchlist(user_id):
 
 
 @watchlists_bp.route("/movies/<int:movie_id>", methods=["POST"])
-@jwt_required()
+@check_user_exists
+@authenticate_user("You are not authorised to add or make changes to this watchlist")
 def add_movie_to_watchlist(user_id, movie_id):
     '''POST endpoint/handler for adding a movie to a user's watchlist'''
-
-    # Get the ID of the authenticated user
-    authenticated_user_id = get_jwt_identity()
-
-    # Check if the authenticated user's ID matches the user_id from the URL
-    if str(user_id) != authenticated_user_id:
-        return jsonify(message="You are not authorised to make changes to this watchlist"), 401
 
     # Get the user's watchlist filtered by user id from DB
     watchlist = Watchlist.query.filter_by(user_id=user_id).first()
@@ -83,16 +78,10 @@ def add_movie_to_watchlist(user_id, movie_id):
 
 
 @watchlists_bp.route("/movies", methods=["PUT"])
-@jwt_required()
+@check_user_exists
+@authenticate_user("You are not authorised to update or make changes to this watchlist")
 def bulk_add_movies_to_watchlist(user_id):
     '''PUT endpoint/handler for bulk adding movies to a user's watchlist'''
-
-    # Get the ID of the authenticated user
-    authenticated_user_id = get_jwt_identity()
-
-    # Check if the authenticated user's ID matches the user_id from the URL
-    if str(user_id) != authenticated_user_id:
-        return jsonify(message="You are not authorised to make changes to this watchlist"), 401
 
     # Validating list of movie ID request body data with schema
     try:
@@ -156,16 +145,10 @@ def bulk_add_movies_to_watchlist(user_id):
 
 
 @watchlists_bp.route("/movies/<int:movie_id>", methods=["DELETE"])
-@jwt_required()
+@check_user_exists
+@authenticate_user("You are not authorised to remove or make changes to this watchlist")
 def delete_movie_from_watchlist(user_id, movie_id):
     '''DELETE endpoint/handler for removing a movie from a user's watchlist'''
-
-    # Get the ID of the authenticated user
-    authenticated_user_id = get_jwt_identity()
-
-    # Check if the authenticated user's ID matches the user_id from the URL
-    if str(user_id) != authenticated_user_id:
-        return jsonify(message="You are not authorised to make changes to this watchlist"), 401
 
     # Query the user's watchlist from the DB filtered by user_id
     watchlist = Watchlist.query.filter_by(user_id=user_id).first()

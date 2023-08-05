@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
+from flask_jwt_extended import create_access_token
 from marshmallow.exceptions import ValidationError
 from main import db, bcrypt
 from models.user import User
@@ -11,6 +11,7 @@ from controllers.movielog_controller import movielogs_bp
 from controllers.review_controller import reviews_bp
 from controllers.rating_controller import ratings_bp
 from datetime import timedelta
+from helpers import authenticate_user, check_user_exists
 
 # Initialises flask blueprint with a /users url prefix
 users_bp = Blueprint('users', __name__, url_prefix="/users")
@@ -112,22 +113,13 @@ def create_user():
 
 
 @users_bp.route("/<int:user_id>", methods=["PUT"])
-@jwt_required()
+@check_user_exists
+@authenticate_user("You are not authorised to update or make changes to this user")
 def update_user(user_id):
     '''PUT endpoint for updating specified user'''
 
-    # Get the ID of the authenticated user
-    authenticated_user_id = get_jwt_identity()
-
-    # Check if the authenticated user's ID matches the user_id from the URL
-    if str(user_id) != authenticated_user_id:
-        return jsonify(message="You are not authorised to update or make changes to this user"), 401
-
     # Queries user from DB
     user = User.query.filter_by(id=user_id).first()
-    # Checks to see if user exists in the DB
-    if not user:
-        return jsonify(message=f"User with ID of {user_id} cannot be found, please try again"), 404
 
     # Validating user request body data with schema
     try:
@@ -199,22 +191,17 @@ def update_user(user_id):
             if result is not None:
                 return result
 
+    # Commit updated changes to DB
     db.session.commit()
+    # Prepare serialised user data for response
     response = user_schema.dump(user)
     return jsonify(message="Account update successful!", user=response), 200
 
 
 @users_bp.route("/<int:user_id>", methods=["DELETE"])
-@jwt_required()
+@authenticate_user("You are not authorised to remove or make changes to this movielog")
 def delete_user(user_id):
     '''DELETE endpoint for deleting specified user'''
-
-    # Get the ID of the authenticated user
-    authenticated_user_id = get_jwt_identity()
-
-    # Check if the authenticated user's ID matches the user_id from the URL
-    if str(user_id) != authenticated_user_id:
-        return jsonify(message="You are not authorised to make changes to this user"), 401
 
     # Queries user from DB
     user = User.query.filter_by(id=user_id).first()
