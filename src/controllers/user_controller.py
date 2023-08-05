@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, abort
+from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
 from marshmallow.exceptions import ValidationError
 from main import db, bcrypt
@@ -74,10 +74,10 @@ def create_user():
 
     # Checks if a user's email is registered
     if existing_email:
-        return abort(409, description=f"Email of {existing_email.email} already registered, please try again")
+        return jsonify(description=f"Email of {existing_email.email} already registered, please try again"), 409
     # Checks if a user's username is registered
     elif existing_username:
-        return abort(409, description=f"Username of {existing_username.username} already registered, please try again")
+        return jsonify(description=f"Username of {existing_username.username} already registered, please try again"), 409
 
     # Creates new user instance
     new_user = User(

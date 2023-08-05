@@ -1,4 +1,5 @@
-from flask import Blueprint, jsonify, request, abort
+from flask import Blueprint, jsonify, request
+from flask_jwt_extended import jwt_required
 from marshmallow.exceptions import ValidationError
 from main import db
 from models.movie import Movie
@@ -34,6 +35,7 @@ def get_movie(movie_id):
 
 
 @movies_bp.route("/", methods=["POST"])
+@jwt_required()
 def add_movie():
     '''POST route/handler for creating and adding a new movie'''
 
@@ -71,6 +73,7 @@ def add_movie():
 
 
 @movies_bp.route("/<int:movie_id>", methods=["PUT"])
+@jwt_required()
 def update_movie(movie_id):
     '''PUT route/handler for updating specified movies info'''
 
@@ -146,6 +149,7 @@ def update_movie(movie_id):
 
 
 @movies_bp.route("/<int:movie_id>", methods=["DELETE"])
+@jwt_required()
 def delete_movie(movie_id):
     '''DELETE route/handler for deleting specified movie from the Cinematica API'''
 
@@ -163,7 +167,7 @@ def delete_movie(movie_id):
         db.session.commit()
         # Create custom response message
         response = {
-            "message": "Movie successfully deleted!",
+            "message": f"{movie.title} successfully deleted!",
             "deleted_movie": movie_data
         }
         return jsonify(response), 200
