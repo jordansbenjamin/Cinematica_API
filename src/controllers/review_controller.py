@@ -5,6 +5,7 @@ from models.review import Review
 from models.movie import Movie
 from models.user import User
 from schemas.review_schema import review_schema, reviews_schema
+from helpers import authenticate_user, check_user_exists
 
 # Initialises flask blueprint for reviews, prefix is nested and registered with users bp
 reviews_bp = Blueprint('reviews', __name__)
@@ -34,14 +35,10 @@ def get_reviews(user_id):
 
 
 @reviews_bp.route("/movies/<int:movie_id>/", methods=["POST"])
+@check_user_exists
+@authenticate_user("You are not authorised to add or make changes to this users reviews")
 def create_review(user_id, movie_id):
     '''POST endpoint/handler for adding a movie review for the specified user'''
-
-    # Queries user instance from DB
-    user = User.query.get(user_id)
-    # Return response message if user cannot be found
-    if not user:
-        return jsonify(message=f"User with ID of {user_id} cannot be found, please try again"), 404
 
     # Validating review request body data with schema
     try:
@@ -81,14 +78,10 @@ def create_review(user_id, movie_id):
 
 
 @reviews_bp.route("/movies/<int:movie_id>/", methods=["PUT"])
+@check_user_exists
+@authenticate_user("You are not authorised to update or make changes to this users reviews")
 def update_review(user_id, movie_id):
     '''PUT endpoint/handler for updating a movie review of the specified user'''
-
-    # Queries user instance from DB
-    user = User.query.get(user_id)
-    # Return response message if user cannot be found
-    if not user:
-        return jsonify(message=f"User with ID of {user_id} cannot be found, please try again"), 404
 
     # Validating review request body data with schema
     try:
@@ -123,14 +116,10 @@ def update_review(user_id, movie_id):
 
 
 @reviews_bp.route("/movies/<int:movie_id>/", methods=["DELETE"])
+@check_user_exists
+@authenticate_user("You are not authorised to remove or make changes to this users reviews")
 def delete_review(user_id, movie_id):
     '''DELETE endpoint/handler for removing a movie review of the specified user'''
-
-    # Queries user instance from DB
-    user = User.query.get(user_id)
-    # Return response message if user cannot be found
-    if not user:
-        return jsonify(message=f"User with ID of {user_id} cannot be found, please try again"), 404
 
     # Query movie from DB based on movie id
     movie = Movie.query.get(movie_id)

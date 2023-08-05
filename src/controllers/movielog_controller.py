@@ -8,12 +8,14 @@ from models.associations import movielog_movie_association
 from schemas.movie_schema import movie_schema
 from schemas.movielog_schema import movielog_schema
 from schemas.bulk_add_movies_schema import bulk_add_movies_schema
+from helpers import authenticate_user, check_user_exists
 
 # Initialises flask blueprint for movielogs, prefix is nested and registered with users bp
 movielogs_bp = Blueprint('movielogs', __name__)
 
 
 @movielogs_bp.route("/", methods=["GET"])
+@check_user_exists
 def get_movielogs(user_id):
     '''GET endpoint/handler for fetching specified users movielog available in the cinematica app'''
 
@@ -43,6 +45,8 @@ def get_movielogs(user_id):
 
 
 @movielogs_bp.route("/movies/<int:movie_id>/", methods=["POST"])
+@check_user_exists
+@authenticate_user("You are not authorised to add or make changes to this movielog")
 def add_movie_to_movielog(user_id, movie_id):
     '''POST endpoint/handler for adding a movie to a user's movielog'''
 
@@ -74,6 +78,8 @@ def add_movie_to_movielog(user_id, movie_id):
 
 
 @movielogs_bp.route("/movies", methods=["PUT", "PATCH"])
+@check_user_exists
+@authenticate_user("You are not authorised to update or make changes to this movielog")
 def bulk_add_movies_to_movielog(user_id):
     '''PUT endpoint/handler for bulk adding movies to a user's movielog'''
 
@@ -140,6 +146,8 @@ def bulk_add_movies_to_movielog(user_id):
 
 
 @movielogs_bp.route("/movies/<int:movie_id>/", methods=["DELETE"])
+@check_user_exists
+@authenticate_user("You are not authorised to remove or make changes to this movielog")
 def remove_movie_from_movielog(user_id, movie_id):
     '''DELETE endpoint/handler for removing a movie from a user's movielog'''
 

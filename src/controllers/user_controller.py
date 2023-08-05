@@ -1,4 +1,5 @@
-from flask import Blueprint, jsonify, request, abort
+from flask import Blueprint, jsonify, request
+from flask_jwt_extended import create_access_token
 from marshmallow.exceptions import ValidationError
 from main import db, bcrypt
 from models.user import User
@@ -9,6 +10,8 @@ from controllers.watchlist_controller import watchlists_bp
 from controllers.movielog_controller import movielogs_bp
 from controllers.review_controller import reviews_bp
 from controllers.rating_controller import ratings_bp
+from datetime import timedelta
+from helpers import authenticate_user, check_user_exists
 
 # Initialises flask blueprint with a /users url prefix
 users_bp = Blueprint('users', __name__, url_prefix="/users")
@@ -72,10 +75,10 @@ def create_user():
 
     # Checks if a user's email is registered
     if existing_email:
-        return abort(409, description=f"Email of {existing_email.email} already registered, please try again")
+        return jsonify(description=f"Email of {existing_email.email} already registered, please try again"), 409
     # Checks if a user's username is registered
     elif existing_username:
-        return abort(409, description=f"Username of {existing_username.username} already registered, please try again")
+        return jsonify(description=f"Username of {existing_username.username} already registered, please try again"), 409
 
     # Creates new user instance
     new_user = User(
@@ -96,29 +99,27 @@ def create_user():
     # Creates new movielog instance for the user
     new_movielog = MovieLog(user_id=new_user.id)
 
+    # Access token for JWT authentication
+    token = create_access_token(identity=str(
+        new_user.id), expires_delta=timedelta(days=1))
+
     # Add new watchlist movielog instances to db and commit
     db.session.add_all([new_watchlist, new_movielog])
     db.session.commit()
 
     # Returns new user information as a JSON respone
     response = user_schema.dump(new_user)
-    return jsonify(message="You have sucessfully registered!", new_user=response), 201
+    return jsonify(message="You have sucessfully registered!", new_user=response, token=token, expiry="24 hrs"), 201
 
 
 @users_bp.route("/<int:user_id>", methods=["PUT"])
-# NOTE: Will add jwt_required when auth feature is added
+@check_user_exists
+@authenticate_user("You are not authorised to update or make changes to this user")
 def update_user(user_id):
     '''PUT endpoint for updating specified user'''
 
     # Queries user from DB
     user = User.query.filter_by(id=user_id).first()
-    # Checks to see if user exists
-    if not user:
-        jsonify(
-            message=f"User with ID of {user_id} cannot be found, please try again"), 404
-    # Checks if the user_id matches
-    elif user.id != user_id:
-        return jsonify(message="You are not authorised to update or make changes to this user."), 401
 
     # Validating user request body data with schema
     try:
@@ -134,7 +135,7 @@ def update_user(user_id):
 
         # Checks to see if the new email matches with the current email
         if user.email == new_email:
-            return jsonify(message="Cannot update, new email matches with current email, please try another email."), 409
+            return jsonify(message="Cannot update, new email matches with current email, please try another email"), 409
 
         # Queries database by filtering email to find match of user_body_data
         existing_user_email = User.query.filter_by(
@@ -142,7 +143,7 @@ def update_user(user_id):
 
         # If the same email already exist then return error
         if existing_user_email:
-            return jsonify(message="Email is already registered."), 409
+            return jsonify(message="Email is already registered"), 409
         # Else update the users registered email with the new email passed in to the body data
         else:
             user.email = new_email
@@ -190,19 +191,21 @@ def update_user(user_id):
             if result is not None:
                 return result
 
+    # Commit updated changes to DB
     db.session.commit()
+    # Prepare serialised user data for response
     response = user_schema.dump(user)
     return jsonify(message="Account update successful!", user=response), 200
 
 
 @users_bp.route("/<int:user_id>", methods=["DELETE"])
+@authenticate_user("You are not authorised to remove or make changes to this movielog")
 def delete_user(user_id):
     '''DELETE endpoint for deleting specified user'''
+
     # Queries user from DB
     user = User.query.filter_by(id=user_id).first()
-    # Checks if the user_id matches
-    if user.id != user_id:
-        return jsonify(message="You are not authorised to delete this user."), 401
+
     # Checks if user exists
     if user:
         # Save user data before deleting
