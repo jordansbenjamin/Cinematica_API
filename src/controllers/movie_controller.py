@@ -3,7 +3,7 @@ from flask_jwt_extended import jwt_required
 from marshmallow.exceptions import ValidationError
 from main import db
 from models.movie import Movie
-from schemas.movie_schema import movie_schema, movies_schema
+from schemas.movie_schema import movie_schema, movies_schema, update_movie_schema
 
 # Initialises flask blueprint with a /movies url prefix
 movies_bp = Blueprint('movies', __name__, url_prefix="/movies")
@@ -11,24 +11,29 @@ movies_bp = Blueprint('movies', __name__, url_prefix="/movies")
 
 @movies_bp.route("/", methods=["GET"])
 def get_all_movies():
-    '''GET endpoint/handler for fetching all movies available in the cinematica API'''
+    '''GET endpoint for fetching all movies available in the cinematica API'''
+
     # Query all movie instances from the DB
     movies = Movie.query.all()
     # Serialises queried movie instances from DB with marshmallow schema into Python DST
     response = movies_schema.dump(movies)
+
+    # Tally total movies available in DB to include in response
+    total_movies = len(movies)
     # Returns the serialised data into JSON format for response
-    return jsonify(response), 200
+    return jsonify(total_movies=total_movies, movies=response), 200
 
 
 @movies_bp.route("/<int:movie_id>", methods=["GET"])
 def get_movie(movie_id):
-    '''GET endpoint/handler for fetching specified movie'''
-    # Queries specified movie from DB
+    '''GET endpoint for fetching specified movie'''
+
+    # Queries specified movie instance from DB filtered by ID
     movie = Movie.query.filter_by(id=movie_id).first()
-    # Checks to see if movie exists
+    # Checks to see if movie exists in DB
     if not movie:
         # If movie doesn't exist, then return abort message
-        return jsonify(description=f"Movie with ID of {movie_id} cannot be found, please try again"), 404
+        return jsonify(error=f"Movie with ID of {movie_id} cannot be found, please try again"), 404
     # Returns jsonified response
     response = movie_schema.dump(movie)
     return jsonify(response), 200
@@ -37,7 +42,7 @@ def get_movie(movie_id):
 @movies_bp.route("/", methods=["POST"])
 @jwt_required()
 def add_movie():
-    '''POST route/handler for creating and adding a new movie'''
+    '''POST endpoint for creating and adding a new movie'''
 
     # Validating movie request body data with schema
     try:
@@ -47,13 +52,13 @@ def add_movie():
         # If fail, return error message
         return jsonify(error.messages), 400
 
-    # Queries existing movie filtered by title and director
+    # Queries existing movie from DB filtered by title and director
     existing_movie = Movie.query.filter_by(
         title=movie_body_data['title'], director=movie_body_data['director']).first()
 
-    # Checks to see if movie exists
+    # Checks to see if movie exists in DB
     if existing_movie:
-        return jsonify(description="Movie with the same director already exists, please try again"), 409
+        return jsonify(error="Movie with the same director already exists, please try again"), 409
 
     # Create new Movie instance
     new_movie = Movie(
@@ -72,22 +77,22 @@ def add_movie():
     return jsonify(message="Movie successfully added!", new_movie=response), 201
 
 
-@movies_bp.route("/<int:movie_id>", methods=["PUT"])
+@movies_bp.route("/<int:movie_id>", methods=["PUT", "PATCH"])
 @jwt_required()
 def update_movie(movie_id):
-    '''PUT route/handler for updating specified movies info'''
+    '''PUT endpoint for updating specified movies info'''
 
-    # Queries specified movie from DB
+    # Queries specified movie instance from DB filtered by movie_id
     movie = Movie.query.filter_by(id=movie_id).first()
-    # Checks to see if movie exists
+    # Checks to see if movie exists in DB
     if not movie:
         # If movie doesn't exist, then return abort message
-        return jsonify(description=f"Movie with ID of {movie_id} cannot be found, please try again"), 404
+        return jsonify(error=f"Movie with ID of {movie_id} cannot be found, please try again"), 404
 
     # Validating movie request body data with schema
     try:
         # If successful, load the request body data
-        movie_body_data = movie_schema.load(request.json)
+        movie_body_data = update_movie_schema.load(request.json)
     except ValidationError as error:
         # If fail, return error message
         return jsonify(error.messages), 400
@@ -137,37 +142,34 @@ def update_movie(movie_id):
         Movie.director == movie.director
     ).first()
 
+    # Checks if the movie already exists in the DB
     if existing_movie:
-        # Rolls back changes made if movie is a dupe
+        # Rolls back changes made if movie is a duplicate
         db.session.rollback()
-        return jsonify(description="Movie with the same director and title already exists, please try again."), 409
+        return jsonify(error="Movie with the same director and title already exists, please try again."), 409
     else:
         db.session.commit()
 
     response = movie_schema.dump(movie)
-    return jsonify(message="Movie update successfull!", movie=response), 200
+    return jsonify(message="Movie successfully updated!", movie=response), 200
 
 
 @movies_bp.route("/<int:movie_id>", methods=["DELETE"])
 @jwt_required()
 def delete_movie(movie_id):
-    '''DELETE route/handler for deleting specified movie from the Cinematica API'''
+    '''DELETE endpoint for deleting specified movie from the Cinematica API'''
 
-    # Queries specified movie from DB
+    # Queries specified movie instance from DB filtered by movie_id
     movie = Movie.query.filter_by(id=movie_id).first()
-    # Checks to see if movie exists
+    # Checks to see if movie exists in DB
     if not movie:
         # If movie doesn't exist, then return abort message
-        return jsonify(description=f"Movie with ID of {movie_id} cannot be found, please try again"), 404
+        return jsonify(error=f"Movie with ID of {movie_id} cannot be found, please try again"), 404
     else:
         # Save movie data before deleting
         movie_data = movie_schema.dump(movie)
         # If movie exist, then delete movie instance from DB
         db.session.delete(movie)
         db.session.commit()
-        # Create custom response message
-        response = {
-            "message": f"{movie.title} successfully deleted!",
-            "deleted_movie": movie_data
-        }
-        return jsonify(response), 200
+
+        return jsonify(message=f"{movie.title} successfully deleted!"), 200
