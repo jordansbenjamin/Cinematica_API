@@ -167,12 +167,11 @@ class WatchlistMovieSchema(ma.Schema):
     # modifying id attribute for changing id field name
     movie_id = ma.Integer(attribute="id")
     # adding date_added field for each movie added into watchlist
-    date_added = fields.Date()
+    date_added = fields.Date(format="%d-%m-%Y")
 
     class Meta:
         ordered = True
-        fields = ('movie_id', 'title', 'director', 'genre',
-                  'runtime', 'release_year', 'date_added')
+        fields = ('movie_id', 'title')
 
 
 # Singular watchlist movie schema instance for retreiving nested movie information into a users watchlist

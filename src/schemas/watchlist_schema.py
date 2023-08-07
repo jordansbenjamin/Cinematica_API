@@ -15,7 +15,7 @@ class WatchlistSchema(ma.Schema):
         ordered = True
         # Fields that will be included during serealisation
         fields = [
-            'watchlist_id',
+            # 'watchlist_id',
             'movies',
         ]
 
