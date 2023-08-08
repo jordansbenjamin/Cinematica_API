@@ -25,9 +25,3 @@ class Rating(db.Model):
     # Establishing relationship with User and Movie
     user = db.relationship('User', back_populates='ratings')
     movie = db.relationship('Movie', back_populates='ratings')
-
-    # Constraint for rating score (1-5) on database level
-    # __table_args__ = (
-    #     CheckConstraint('rating_score>=1 AND rating_score<=5',
-    #                     name='rating_score_check')
-    # )

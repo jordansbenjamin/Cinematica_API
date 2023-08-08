@@ -13,9 +13,9 @@ ratings_bp = Blueprint('ratings', __name__)
 
 @ratings_bp.route("/", methods=["GET"])
 def get_ratings(user_id):
-    '''GET endpoint/handler for fetching specified users movie ratings'''
+    '''GET endpoint for fetching specified users movie ratings'''
 
-    # Query the user using get by user_id from DB
+    # Query the user using get by user ID from DB
     user = User.query.get(user_id)
 
     # Checks if user exists in DB
@@ -23,23 +23,24 @@ def get_ratings(user_id):
         # Queries rating instance from DB
         ratings = Rating.query.filter_by(user_id=user_id).all()
 
-        # Checks if there are movies rated
+        # Checks if there are any movies rated
         if len(ratings) < 1:
-            return jsonify(message=f"No ratings found for user with ID of {user_id}, please try again"), 404
+            return jsonify(error=f"No ratings found for {user.username}, please try again"), 404
 
         # Serialises queried rating instances from DB with marshmallow schema into Python DST
         response = ratings_schema.dump(ratings)
         # Returns the serialised data into JSON format for response
         return jsonify(message=f"{len(ratings)} movies rated for {user.username}", ratings=response)
     else:
-        return jsonify(message=f"User with ID of {user_id} cannot be found"), 404
+        # Return error message if user cannot be found
+        return jsonify(error=f"User with ID of {user_id} cannot be found"), 404
 
 
 @ratings_bp.route("/movies/<int:movie_id>/", methods=["POST"])
 @check_user_exists
 @authenticate_user("You are not authorised to add or make changes to this users ratings")
 def add_movie_rating(user_id, movie_id):
-    '''POST endpoint/handler for adding a movie rating of the specified user'''
+    '''POST endpoint for adding a movie rating of the specified user'''
 
     # Validating rating request body data with schema
     try:
@@ -49,20 +50,20 @@ def add_movie_rating(user_id, movie_id):
         # If fail, return error message
         return jsonify(error.messages), 400
 
-    # Query movie from DB based on movie id
+    # Query movie from DB based on movie ID
     movie = Movie.query.get(movie_id)
-    # Checks if the movie exists
+    # Checks if the movie exists in the DB
     if not movie:
-        return jsonify(message=f"Movie with ID {movie_id} cannot be found, please try again"), 404
+        return jsonify(error=f"Movie with ID {movie_id} cannot be found, please try again"), 404
 
-    # Query an existing rating for a movie from DB filtered by both user_id and movie_id
+    # Query an existing rating for a movie from DB filtered by both user ID and movie ID
     existing_rating = Rating.query.filter_by(
         user_id=user_id, movie_id=movie_id).first()
-    # Checks if a rating for a mvovie already exists to avoid duplication
+    # Checks if a rating for a movie already exists to avoid duplication
     if existing_rating:
-        return jsonify(message=f"{movie.title} has already been rated"), 409
+        return jsonify(error=f"{movie.title} has already been rated"), 409
 
-    # Create new rating instance
+    # Create new rating instance to be added to DB
     new_rating = Rating(
         rating_score=rating_body_data["rating_score"],
         user_id=user_id,
@@ -82,7 +83,7 @@ def add_movie_rating(user_id, movie_id):
 @check_user_exists
 @authenticate_user("You are not authorised to update or make changes to this users ratings")
 def update_movie_rating(user_id, movie_id):
-    '''PUT endpoint/handler for updating a movie's rating of the specified user'''
+    '''PUT endpoint for updating a movie's rating of the specified user'''
 
     # Validating rating request body data with schema
     try:
@@ -96,14 +97,14 @@ def update_movie_rating(user_id, movie_id):
     movie = Movie.query.get(movie_id)
     # Checks if the movie exists
     if not movie:
-        return jsonify(message=f"Movie with ID {movie_id} cannot be found, please try again"), 404
+        return jsonify(error=f"Movie with ID {movie_id} cannot be found, please try again"), 404
 
     # Query an existing rating for a movie from DB filtered by both user_id and movie_id
     existing_rating = Rating.query.filter_by(
         user_id=user_id, movie_id=movie_id).first()
     # Checks if a rating for a movie already exists for the rating to be updated
     if not existing_rating:
-        return jsonify(message=f"No existing rating found for {movie.title} by user with ID of {user_id}"), 404
+        return jsonify(error=f"No existing rating found for {movie.title}"), 404
 
     # Update the existing rating with the new rating
     existing_rating.rating_score = rating_body_data["rating_score"]
@@ -120,20 +121,20 @@ def update_movie_rating(user_id, movie_id):
 @check_user_exists
 @authenticate_user("You are not authorised to remove or make changes to this users ratings")
 def remove_movie_rating(user_id, movie_id):
-    '''DELETE endpoint/handler for removing a movie rating of the specified user'''
+    '''DELETE endpoint for removing a movie rating of the specified user'''
 
     # Query movie from DB based on movie id
     movie = Movie.query.get(movie_id)
     # Checks if the movie exists
     if not movie:
-        return jsonify(message=f"Movie with ID {movie_id} cannot be found, please try again"), 404
+        return jsonify(error=f"Movie with ID {movie_id} cannot be found, please try again"), 404
 
     # Query an existing rating for a movie from DB filtered by both user_id and movie_id
     existing_rating = Rating.query.filter_by(
         user_id=user_id, movie_id=movie_id).first()
     # Checks if a rating for a movie already exists for the rating to be removed
     if not existing_rating:
-        return jsonify(message=f"No existing rating found for {movie.title} by user with ID of {user_id}"), 404
+        return jsonify(error=f"No existing rating found for {movie.title}"), 404
 
     # Save rating before deletion for response
     response = rating_schema.dump(existing_rating)
