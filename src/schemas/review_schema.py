@@ -22,6 +22,7 @@ class ReviewSchema(ma.Schema):
         load_only = ["id"]
 
     review_text = ma.String(required=True, validate=Length(min=5, max=2000, error=TXT_ERR_MSG))
+    review_date = ma.Date(format="%d-%m-%Y")
 
     @pre_load
     def trim_inputs(self, data, **kwargs):
