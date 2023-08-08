@@ -11,9 +11,9 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 @auth_bp.route("/login", methods=["POST"])
 def auth_login():
-    '''POST route for logging in user based on username and password, presenting their token for accessing certain endpoints'''
+    '''POST endpoint for logging in user based on username and password, presenting their JWT access token for accessing certain endpoints'''
 
-    # Validating user request body data with schema
+    # Validating user request body data with auth_user_schema
     try:
         # If successful, load the request body data
         user_body_data = auth_user_schema.load(request.json)
@@ -21,7 +21,7 @@ def auth_login():
         # If fail, return error message
         return jsonify(error.messages), 400
 
-    # Query user from DB filtered by username
+    # Query first instance of user from DB filtered by username
     user = User.query.filter_by(username=user_body_data["username"]).first()
 
     # Checks if the user exists and the password matches
@@ -29,8 +29,8 @@ def auth_login():
         # Create the access token required for logging in
         token = create_access_token(identity=str(
             user.id), expires_delta=timedelta(days=1))
-        # Return successful response along with the token and expiry
-        return jsonify(message="Successfully logged in!", username=user.username, token=token, expiry="24 hrs"), 200
+        # Return successful response along with the access token and expiry info
+        return jsonify(message="Successfully logged in!", user=user.username, token=token, expiry="24 hrs"), 200
     else:
-        # If username and password doesn't match return error
-        return jsonify(message="Invalid username and password, please try again"), 401
+        # If username and password doesn't match, return error
+        return jsonify(error="Invalid username and password, please try again"), 401

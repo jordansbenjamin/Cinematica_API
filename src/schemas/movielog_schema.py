@@ -12,7 +12,6 @@ class MovieLogSchema(ma.Schema):
         ordered = True
         # Fields that will be included during serealisation
         fields = [
-            'movielog_id',
             'movies',
         ]
 

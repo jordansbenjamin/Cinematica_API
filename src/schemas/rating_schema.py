@@ -23,6 +23,7 @@ class RatingSchema(ma.Schema):
         load_only = ["id"]
 
     rating_score = ma.Integer(required=True)
+    rating_date = ma.Date(format="%d-%m-%Y")
     
     @validates('rating_score')
     def validate_rating_score(self, value):
