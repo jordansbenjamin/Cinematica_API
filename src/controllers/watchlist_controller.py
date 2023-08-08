@@ -90,11 +90,11 @@ def add_movie_to_watchlist(user_id, movie_id):
         return jsonify(error=f"{movie.title} is already in this watchlist"), 409
 
 
-@watchlists_bp.route("/movies", methods=["PUT"])
+@watchlists_bp.route("/movies", methods=["PUT", "PATCH"])
 @check_user_exists
 @authenticate_user("You are not authorised to update or make changes to this watchlist")
 def bulk_add_movies_to_watchlist(user_id):
-    '''PUT endpoint for bulk adding movies to a user's watchlist'''
+    '''PUT/PATCH endpoint for bulk adding movies to a user's watchlist'''
 
     # Validating list of movie ID request body data with schema
     try:
@@ -122,7 +122,7 @@ def bulk_add_movies_to_watchlist(user_id):
 
         # Query movie from DB based on movie ID
         movie = Movie.query.get(movie_id)
-        # Checks if the movie exists
+        # Checks if the movie exists in the DB
         if not movie:
             return jsonify(error=f"Movie with ID {movie_id} cannot be found, please try again"), 404
 
@@ -157,7 +157,7 @@ def bulk_add_movies_to_watchlist(user_id):
         # Rollback the session and changes made if there is an error
         db.session.rollback()
         # Return error message in JSON format
-        return jsonify(message=str(error)), 500
+        return jsonify(error=str(error)), 500
 
 
 @watchlists_bp.route("/movies/<int:movie_id>", methods=["DELETE"])

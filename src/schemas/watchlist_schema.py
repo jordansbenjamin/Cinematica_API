@@ -1,6 +1,4 @@
 from main import ma
-from marshmallow import fields, validates
-from marshmallow.exceptions import ValidationError
 from schemas.movie_schema import WatchlistMovieSchema
 
 
@@ -15,7 +13,6 @@ class WatchlistSchema(ma.Schema):
         ordered = True
         # Fields that will be included during serealisation
         fields = [
-            # 'watchlist_id',
             'movies',
         ]
 
