@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_bcrypt import Bcrypt
@@ -38,5 +38,13 @@ def create_app():
     # Iterates through list of controllers to register
     for controller in registerable_controllers:
         app.register_blueprint(controller)
+
+    @app.errorhandler(415)
+    def unsupported_media_type(e):
+        '''Handles content type errors via JSON response instead of HTML.
+        
+           A reminder to provide the expected JSON data in the request body.
+        '''
+        return jsonify(error="Content-Type must be 'application/json'. Please provide data request as JSON"), 415
 
     return app

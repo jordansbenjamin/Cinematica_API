@@ -11,7 +11,7 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 @auth_bp.route("/login", methods=["POST"])
 def auth_login():
-    '''POST endpoint for logging in user based on username and password, presenting their token for accessing certain endpoints'''
+    '''POST endpoint for logging in user based on username and password, presenting their JWT access token for accessing certain endpoints'''
 
     # Validating user request body data with auth_user_schema
     try:

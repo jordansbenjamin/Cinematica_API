@@ -41,17 +41,17 @@ def get_all_users():
 def get_one_user(user_id):
     '''GET endpoint for fetching single user by ID'''
 
-    # Queries first instance of user filtered by ID
+    # Queries first instance of user filtered by user ID
     user = User.query.filter_by(id=user_id).first()
 
-    # Check if user exists
+    # Check if user exists in the DB
     if user:
-        # Single user instance serialised
+        # Single user instance serialised for response
         response = user_schema.dump(user)
         # Returns user information back as JSON
         return jsonify(response), 200
     else:
-        # When user cannot be found, return error
+        # When user cannot be found in the DB, return error
         return jsonify(error=f"User with ID of {user_id} cannot be found, please try again"), 404
 
 
@@ -67,17 +67,17 @@ def create_user():
         # If fail, return error message
         return jsonify(error.messages), 400
 
-    # Queries existing email from user_body_data email field
+    # Queries DB for existing email from user_body_data email field
     existing_email = User.query.filter_by(
         email=user_body_data["email"]).first()
-    # Queries existing email from user_body_data email field
+    # Queries DB for existing username from user_body_data email field
     existing_username = User.query.filter_by(
         username=user_body_data["username"]).first()
 
-    # Checks if a user's email is registered
+    # Checks if a user's email is already registered in DB
     if existing_email:
         return jsonify(error="Email already registered, please try again"), 409
-    # Checks if a user's username is registered
+    # Checks if a user's username is already registered in DB
     elif existing_username:
         return jsonify(error=f"{existing_username.username} is already registered, please try again"), 409
 
@@ -91,7 +91,7 @@ def create_user():
 
     # Add new user instance to DB
     db.session.add(new_user)
-    # Commit user in order to associate watchlist and movielog
+    # Commit new user in order to associate watchlist and movielog
     db.session.commit()
 
     # Newly registered users will have a watchlist and movielog created for them automatically
@@ -119,10 +119,10 @@ def create_user():
 def update_user(user_id):
     '''PUT/PATCH endpoint for updating specified user'''
 
-    # Queries user from DB filtered by ID
+    # Queries user from DB filtered by user ID
     user = User.query.filter_by(id=user_id).first()
 
-    # Validating user request body data with user_schema
+    # Validating user request body data with update_user_schema
     try:
         # If successful, load the request body data
         user_body_data = update_user_schema.load(request.json)
@@ -156,7 +156,7 @@ def update_user(user_id):
         if user.username == new_username:
             return jsonify(error="New username matches with current username, please try another username"), 409
 
-        # Queries database by filtering username to find match of user_body_data
+        # Queries DB by filtering username to find match of user_body_data
         existing_username = User.query.filter_by(username=new_username).first()
 
         # If the same username already exists then return error
@@ -186,7 +186,7 @@ def update_user(user_id):
         "password": update_password
     }
 
-    # To track updates made to users password
+    # To track updates made to users password, starting with default 'password not updated'
     password_updated = "Password not updated"
 
     # Loops through updates dict to call func for updating user data
@@ -210,7 +210,6 @@ def update_user(user_id):
     }
 
     # Prepare serialised user data for response
-    # response = update_user_schema.dump(user)
     return jsonify(message="Account update successful!", user=response), 200
 
 
@@ -219,12 +218,12 @@ def update_user(user_id):
 def delete_user(user_id):
     '''DELETE endpoint for deleting specified user'''
 
-    # Queries user from DB filtered by ID
+    # Queries user from DB filtered by user ID
     user = User.query.filter_by(id=user_id).first()
 
     # Checks if user exists in DB
     if user:
-        # If user exist, then delete user instance from DB and commit changes to confirm delete
+        # If user exist, then delete user instance from DB and commit changes to confirm deletion
         db.session.delete(user)
         db.session.commit()
         # Return success message

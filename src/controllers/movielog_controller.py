@@ -44,7 +44,7 @@ def get_movielogs(user_id):
         movie_data['added_to_movielog'] = date_logged[0].strftime(
             "%d-%m-%Y") if date_logged else None
 
-    # Tally total movies available in the watchlismovielog to include in response
+    # Tally total movies available in the movielog to include in response
     total_movies = len(movielog.movies)
 
     # If there is more than one movie, the response message is plural
@@ -93,9 +93,9 @@ def add_movie_to_movielog(user_id, movie_id):
 @check_user_exists
 @authenticate_user("You are not authorised to update or make changes to this movielog")
 def bulk_add_movies_to_movielog(user_id):
-    '''PUT endpoint for bulk adding movies to a user's movielog'''
+    '''PUT/PATCH endpoint for bulk adding movies to a user's movielog'''
 
-    # Validating list of movie ID request body data with schema
+    # Validating list of movie ID request body data with bulk_add_movie_schema
     try:
         # If successful, load the request body data
         movie_id_list_body_data = bulk_add_movies_schema.load(request.json)
@@ -103,12 +103,12 @@ def bulk_add_movies_to_movielog(user_id):
         # If fail, return error message
         return jsonify(error.messages), 400
 
-    # Get the list of movie id's from the body data
+    # Get the list of movie ID's from the body data
     movie_ids = movie_id_list_body_data.get('list_of_movie_ids')
 
     # Query the user's movielog filtered by user ID
     movielog = MovieLog.query.filter_by(user_id=user_id).first()
-    # Checks if the movielog exists for the user
+    # Checks if the movielog exists for the user in the DB
     if not movielog:
         return jsonify(error=f"No movielog found for user with ID of {user_id}"), 404
 
@@ -116,7 +116,7 @@ def bulk_add_movies_to_movielog(user_id):
     movies_data = []
     already_in_movielog = []
 
-    # Iterate movies from list of movie id's
+    # Iterate movies from list of movie ID's
     for movie_id in movie_ids:
 
         # Query movie from DB based on movie ID
@@ -167,13 +167,13 @@ def remove_movie_from_movielog(user_id, movie_id):
 
     # Query the user's movielog from the DB filtered by user ID
     movielog = MovieLog.query.filter_by(user_id=user_id).first()
-    # Checks if the movielog exists for the user
+    # Checks if the movielog exists for the user in the DB
     if not movielog:
         return jsonify(error=f"No movielog found for user with ID of {user_id}"), 404
 
     # Query the movie from DB based on movie ID
     movie = Movie.query.get(movie_id)
-    # Check is the movie exists in the DB
+    # Checks if the movie exists in the DB
     if not movie:
         return jsonify(error=f"Movie with ID {movie_id} cannot be found, please try again"), 404
 
@@ -181,7 +181,7 @@ def remove_movie_from_movielog(user_id, movie_id):
     if movie not in movielog.movies:
         return jsonify(error=f"{movie.title} not found in movielog to remove"), 400
 
-    # Remove the movie from the movielog
+    # If all else is successful, remove the movie from the movielog
     movielog.movies.remove(movie)
 
     try:

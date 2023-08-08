@@ -5,7 +5,7 @@ from models.user import User
 
 
 def authenticate_user(error_msg):
-    '''Decorator for authenticating users, custom error_msg can be passed in unqiuely for each route'''
+    '''Decorator for authenticating users, custom error_msg can be passed in unqiuely for each endpoint'''
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
@@ -29,7 +29,7 @@ def authenticate_user(error_msg):
 
 
 def check_user_exists(f):
-    '''Decorator for checking if a user exists'''
+    '''Decorator for checking if a user exists in the DB'''
     @wraps(f)
     def decorated_function(*args, **kwargs):
         # Get the user_id from the route URL

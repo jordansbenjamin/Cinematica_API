@@ -23,7 +23,7 @@ def get_ratings(user_id):
         # Queries rating instance from DB
         ratings = Rating.query.filter_by(user_id=user_id).all()
 
-        # Checks if there are any movies rated
+        # Checks if there are any movies rated by the user
         if len(ratings) < 1:
             return jsonify(error=f"No ratings found for {user.username}, please try again"), 404
 
@@ -42,7 +42,7 @@ def get_ratings(user_id):
 def add_movie_rating(user_id, movie_id):
     '''POST endpoint for adding a movie rating of the specified user'''
 
-    # Validating rating request body data with schema
+    # Validating rating request body data with rating_schema
     try:
         # If successful, load the request body data
         rating_body_data = rating_schema.load(request.json)
@@ -85,7 +85,7 @@ def add_movie_rating(user_id, movie_id):
 def update_movie_rating(user_id, movie_id):
     '''PUT endpoint for updating a movie's rating of the specified user'''
 
-    # Validating rating request body data with schema
+    # Validating rating request body data with rating_schema
     try:
         # If successful, load the request body data
         rating_body_data = rating_schema.load(request.json)
@@ -93,13 +93,13 @@ def update_movie_rating(user_id, movie_id):
         # If fail, return error message
         return jsonify(error.messages), 400
 
-    # Query movie from DB based on movie id
+    # Query movie from DB based on movie ID
     movie = Movie.query.get(movie_id)
-    # Checks if the movie exists
+    # Checks if the movie exists in the DB
     if not movie:
         return jsonify(error=f"Movie with ID {movie_id} cannot be found, please try again"), 404
 
-    # Query an existing rating for a movie from DB filtered by both user_id and movie_id
+    # Query an existing rating for a movie from DB filtered by both user ID and movie ID
     existing_rating = Rating.query.filter_by(
         user_id=user_id, movie_id=movie_id).first()
     # Checks if a rating for a movie already exists for the rating to be updated
@@ -123,13 +123,13 @@ def update_movie_rating(user_id, movie_id):
 def remove_movie_rating(user_id, movie_id):
     '''DELETE endpoint for removing a movie rating of the specified user'''
 
-    # Query movie from DB based on movie id
+    # Query movie from DB based on movie ID
     movie = Movie.query.get(movie_id)
-    # Checks if the movie exists
+    # Checks if the movie exists in the DB
     if not movie:
         return jsonify(error=f"Movie with ID {movie_id} cannot be found, please try again"), 404
 
-    # Query an existing rating for a movie from DB filtered by both user_id and movie_id
+    # Query an existing rating for a movie from DB filtered by both user ID and movie ID
     existing_rating = Rating.query.filter_by(
         user_id=user_id, movie_id=movie_id).first()
     # Checks if a rating for a movie already exists for the rating to be removed

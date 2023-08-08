@@ -20,10 +20,10 @@ watchlists_bp = Blueprint('watchlists', __name__)
 def get_watchlist(user_id):
     '''GET endpoint for fetching specified users watchlist available in the cinematica app'''
 
-    # Queries watchlist instance from the DB filtered by ID
+    # Queries watchlist instance from the DB filtered by watchlist ID
     watchlist = Watchlist.query.filter_by(user_id=user_id).first()
 
-    # Queries first instance of user filtered by ID
+    # Queries first instance of user filtered by user ID
     user = User.query.filter_by(id=user_id).first()
 
     # Checks if watchlist exists for the user in the DB
@@ -74,7 +74,7 @@ def add_movie_to_watchlist(user_id, movie_id):
     if not movie:
         return jsonify(error=f"Movie with ID {movie_id} cannot be found, please try again"), 404
 
-    # Add the movie to the watchlist
+    # Add the movie to the users watchlist in the DB
     watchlist.movies.append(movie)
 
     try:
@@ -96,7 +96,7 @@ def add_movie_to_watchlist(user_id, movie_id):
 def bulk_add_movies_to_watchlist(user_id):
     '''PUT/PATCH endpoint for bulk adding movies to a user's watchlist'''
 
-    # Validating list of movie ID request body data with schema
+    # Validating list of movie ID request body data with bulk_add_movies_schema
     try:
         # If successful, load the request body data
         movie_id_list_body_data = bulk_add_movies_schema.load(request.json)
@@ -117,7 +117,7 @@ def bulk_add_movies_to_watchlist(user_id):
     movies_data = []
     already_in_watchlist = []
 
-    # Iterate movies from list of movie id's
+    # Iterate movies from list of movie ID's
     for movie_id in movie_ids:
 
         # Query movie from DB based on movie ID
@@ -132,7 +132,7 @@ def bulk_add_movies_to_watchlist(user_id):
             already_in_watchlist.append(minimal_movie_schema.dump(movie))
             continue  # Skip to the next movie
 
-        # Add the movie to the watchlist
+        # Add the movie to the users watchlist
         watchlist.movies.append(movie)
         # Add the movie to the movie data list
         movies_data.append(minimal_movie_schema.dump(movie))
@@ -166,13 +166,13 @@ def bulk_add_movies_to_watchlist(user_id):
 def delete_movie_from_watchlist(user_id, movie_id):
     '''DELETE endpoint for removing a movie from a user's watchlist'''
 
-    # Query the user's watchlist from the DB filtered by user_id
+    # Query the user's watchlist from the DB filtered by user ID
     watchlist = Watchlist.query.filter_by(user_id=user_id).first()
     # Checks if the watchlist exists for the user in the DB
     if not watchlist:
         return jsonify(error=f"No watchlist found for user with ID of {user_id}"), 404
 
-    # Query the movie from DB based on movie_id
+    # Query the movie from DB based on movie ID
     movie = Movie.query.get(movie_id)
     # Check if the movie exists in the DB
     if not movie:

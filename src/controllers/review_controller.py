@@ -22,7 +22,7 @@ def get_reviews(user_id):
     if user:
         # Queries review instance from the DB
         reviews = Review.query.filter_by(user_id=user_id).all()
-        # Checks if the user has reviews available
+        # Checks if the user have existing reviews available
         if len(reviews) < 1:
             return jsonify(error=f"No reviews found for {user.username}, please try again"), 404
 

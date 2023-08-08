@@ -28,13 +28,13 @@ def get_all_movies():
 def get_movie(movie_id):
     '''GET endpoint for fetching specified movie'''
 
-    # Queries specified movie instance from DB filtered by ID
+    # Queries specified movie instance from DB filtered by movie ID
     movie = Movie.query.filter_by(id=movie_id).first()
     # Checks to see if movie exists in DB
     if not movie:
-        # If movie doesn't exist, then return abort message
+        # If movie doesn't exist, then return error message
         return jsonify(error=f"Movie with ID of {movie_id} cannot be found, please try again"), 404
-    # Returns jsonified response
+    # Returns response as JSON
     response = movie_schema.dump(movie)
     return jsonify(response), 200
 
@@ -44,7 +44,7 @@ def get_movie(movie_id):
 def add_movie():
     '''POST endpoint for creating and adding a new movie'''
 
-    # Validating movie request body data with schema
+    # Validating movie request body data with movie_schema
     try:
         # If successful, load the request body data
         movie_body_data = movie_schema.load(request.json)
@@ -58,9 +58,10 @@ def add_movie():
 
     # Checks to see if movie exists in DB
     if existing_movie:
+        # If movie doesn't exist, then return error message
         return jsonify(error="Movie with the same director already exists, please try again"), 409
 
-    # Create new Movie instance
+    # Create new movie instance
     new_movie = Movie(
         title=movie_body_data.get('title'),
         director=movie_body_data.get('director'),
@@ -69,7 +70,7 @@ def add_movie():
         release_year=movie_body_data.get('release_year')
     )
 
-    # Add new movie instance to db and commit
+    # Add new movie instance to DB and commit
     db.session.add(new_movie)
     db.session.commit()
     # Returns new movie information as a JSON respone
@@ -86,10 +87,10 @@ def update_movie(movie_id):
     movie = Movie.query.filter_by(id=movie_id).first()
     # Checks to see if movie exists in DB
     if not movie:
-        # If movie doesn't exist, then return abort message
+        # If movie doesn't exist, then return error message
         return jsonify(error=f"Movie with ID of {movie_id} cannot be found, please try again"), 404
 
-    # Validating movie request body data with schema
+    # Validating movie request body data with update_movie_schema
     try:
         # If successful, load the request body data
         movie_body_data = update_movie_schema.load(request.json)
@@ -126,7 +127,7 @@ def update_movie(movie_id):
         "release_year": update_release_year
     }
 
-    # For each item (field, update function pair) in the 'updates' dict:
+    # Loops through updates dict to call func for updating movie data
     for field, update_func in updates.items():
         # If the field is present in the request data:
         if field in movie_body_data:
@@ -150,7 +151,9 @@ def update_movie(movie_id):
     else:
         db.session.commit()
 
+    # Save the update movie information for serialisation
     response = movie_schema.dump(movie)
+    # Return successful movie update response
     return jsonify(message="Movie successfully updated!", movie=response), 200
 
 
@@ -159,15 +162,13 @@ def update_movie(movie_id):
 def delete_movie(movie_id):
     '''DELETE endpoint for deleting specified movie from the Cinematica API'''
 
-    # Queries specified movie instance from DB filtered by movie_id
+    # Queries specified movie instance from DB filtered by movie ID
     movie = Movie.query.filter_by(id=movie_id).first()
     # Checks to see if movie exists in DB
     if not movie:
-        # If movie doesn't exist, then return abort message
+        # If movie doesn't exist, then return error message
         return jsonify(error=f"Movie with ID of {movie_id} cannot be found, please try again"), 404
     else:
-        # Save movie data before deleting
-        movie_data = movie_schema.dump(movie)
         # If movie exist, then delete movie instance from DB
         db.session.delete(movie)
         db.session.commit()
