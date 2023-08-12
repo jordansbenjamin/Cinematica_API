@@ -1,6 +1,5 @@
 from main import db
 from datetime import datetime
-from sqlalchemy import CheckConstraint
 
 
 class Rating(db.Model):

@@ -1,0 +1,2 @@
+DATABASE_URL="postgresql+psycopg2://cinematica_dbuser:cinematica888@localhost:5432/cinematica_db"
+SECRET_KEY="the_most_secret_key"

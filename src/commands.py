@@ -4,6 +4,8 @@ from models.user import User
 from models.movie import Movie
 from models.watchlist import Watchlist
 from models.movielog import MovieLog
+from models.review import Review
+from models.rating import Rating
 
 # Initialises flask blueprint for DB CLI commands
 db_commands = Blueprint('db', __name__)
@@ -119,6 +121,59 @@ def seed_db():
     # Add all movie instances to DB
     db.session.add_all(movies)
     # Commit to DB
+    db.session.commit()
+
+    # Adding movies to the first user's watchlist and movielog
+    # Adding first 3 movies to the first user's watchlist
+    watchlists[0].movies.extend(movies[:3])
+    db.session.add(watchlists[0])
+
+    # Adding next 2 movies to the first user's movielog
+    movielogs[0].movies.extend(movies[3:5])
+    db.session.add(movielogs[0])
+
+    # Adding movies to the second user's watchlist and movielog
+    # Adding last 3 movies to the second user's watchlist
+    watchlists[1].movies.extend(movies[4:])
+    db.session.add(watchlists[1])
+
+    # Adding the first 2 movies to the second user's movielog
+    movielogs[1].movies.extend(movies[:2])
+    db.session.add(movielogs[1])
+
+    # Adding test review data to seed DB
+    reviews = [
+        Review(
+            review_text="Fantastic movie!",
+            user_id=users[0].id,
+            movie_id=movies[2].id
+        ),
+        Review(
+            review_text="It was an interesting movie, definitely something to think about",
+            user_id=users[1].id,
+            movie_id=movies[5].id
+        )
+    ]
+
+    db.session.add_all(reviews)
+
+    # Adding test rating data to seed DB
+    ratings = [
+        Rating(
+            rating_score=5,
+            user_id=users[0].id,
+            movie_id=movies[6].id
+        ),
+        Rating(
+            rating_score=4,
+            user_id=users[1].id,
+            movie_id=movies[3].id
+        )
+    ]
+
+    db.session.add_all(ratings)
+
+    # Commit changes to DB
     db.session.commit()
 
     print("DB Tables seeded!")

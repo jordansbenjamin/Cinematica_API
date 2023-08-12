@@ -29,8 +29,12 @@ def get_ratings(user_id):
 
         # Serialises queried rating instances from DB with marshmallow schema into Python DST
         response = ratings_schema.dump(ratings)
-        # Returns the serialised data into JSON format for response
-        return jsonify(message=f"{len(ratings)} movies rated for {user.username}", ratings=response)
+        if len(ratings) > 1:
+            # Returns the serialised data into JSON format for response
+            return jsonify(message=f"{len(ratings)} movies rated for {user.username}", ratings=response)
+        else:
+            # Returns the serialised data into JSON format for response
+            return jsonify(message=f"{len(ratings)} movie rated for {user.username}", ratings=response)
     else:
         # Return error message if user cannot be found
         return jsonify(error=f"User with ID of {user_id} cannot be found"), 404
