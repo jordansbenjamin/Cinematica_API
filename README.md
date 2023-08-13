@@ -2318,7 +2318,7 @@ You will find below the final iteration for the Entity Relationship Diagram (ERD
 
 Of course this being a relational database, each entity in the ERD represents all the different tables and its respective attributes along with their constraints as well. More importantly, this ERD adopts the crows foot notation as a database and ERD design process. Crows foot notation provides symbols that represents the four types of cardinality that an entity might have in a relationship.
 
-If you wish to go through other iterations of the ERD, you can view them here.
+If you wish to go through other iterations of the ERD, you can view them [*here*](https://github.com/jordansbenjamin/Cinematica_API/blob/main/docs/ERD-iterations.md).
 
 ### Discusing database relations
 
@@ -2423,7 +2423,7 @@ Attributes represented in the ERD:
 - Watchlist_ID (Primary Key, Integer, Not Null)
 - User_ID (Foreign Key, Integer, Not Null, References User(User_ID), unique)
 
-#### Watchlist movie association (join table)
+##### Watchlist movie association (join table)
 
 As discussed earlier in the movie and watchlist sections, a watchlist movie association is required to help bridge the many-to-many relationship the two entities have with each other.
 
@@ -2872,7 +2872,7 @@ Shortly after, I presented a draft of the ERD for the Cinematica API, it being o
 
 <img src="./docs/Movie-API-ERD_V1.jpg"></img>
 
-If you wish to view other iterations of the Cinemetica API ERD, please find them here.
+If you wish to view other iterations of the Cinemetica API ERD, please find them [*here*](https://github.com/jordansbenjamin/Cinematica_API/blob/main/docs/ERD-iterations.md).
 
 During this initial planning phase, there was some back and forth between the educators and myself when discussing feedbacks on the drafted ideas and potential directions for the API, here are some examples of those discussions:
 
@@ -2892,7 +2892,7 @@ I added all the tasks required each step of the way from the initial planning ph
 
 You can find the Trello board I used for the Cinematica API project here: [Cinematica-API_Trello-Board](https://trello.com/b/3938cdC4/cinematica-api)
 
-<img src="./docs/Screenshots/trello.jpg" width=""></img>
+<img src="./docs/Screenshots/trello.jpg" width="450"></img>
 
 I separated the Trello board into 5 different parts using the Trello list feature, they are separated and named as follows:
 
@@ -2927,11 +2927,11 @@ I separated the Trello board into 5 different parts using the Trello list featur
 
 **Here are some screenshots of selected cards:**
 
-<img src="./docs/Screenshots/trello2.jpg" width=""></img>
+<img src="./docs/Screenshots/trello2.jpg" width="400"></img>
 
-<img src="./docs/Screenshots/trello3.jpg" width=""></img>
+<img src="./docs/Screenshots/trello3.jpg" width="400"></img>
 
-<img src="./docs/Screenshots/trello4.jpg" width=""></img>
+<img src="./docs/Screenshots/trello4.jpg" width="400"></img>
 
 You will notice that I broke down some of the larger components when tackling the project into its own individual cards, for example the controller, model, and schema cards are separated into their own sections with checklists of their own.
 
