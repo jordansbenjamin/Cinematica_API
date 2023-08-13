@@ -2892,7 +2892,7 @@ I added all the tasks required each step of the way from the initial planning ph
 
 You can find the Trello board I used for the Cinematica API project here: [Cinematica-API_Trello-Board](https://trello.com/b/3938cdC4/cinematica-api)
 
-<img src="./docs/Screenshots/trello.jpg" width="450"></img>
+<img src="./docs/Screenshots/trello.jpg" width="480"></img>
 
 I separated the Trello board into 5 different parts using the Trello list feature, they are separated and named as follows:
 
