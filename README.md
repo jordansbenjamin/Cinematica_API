@@ -1,8 +1,8 @@
 # Cinematica API
 
-A RESTful API for movie enthusiasts to review, rate and keep track of movies throughout their cinematic journey.
+A RESTful API for movie enthusiasts to review, rate and catalog movies throughout their cinematic journey.
 
-This project is developed as an assignment for Coder Academy, it being an API webserver, there is no front-end implemented. To test the functionality of the API, you can use API client testing tools such as Postman or Insomnia to have a UI to test the API endpoints on.
+This project is developed as an assignment for Coder Academy, it being an API webserver, there is no front-end implemented. To test the functionality of the API, you can use API client testing tools such as Postman or Insomnia to have a GUI to test the API endpoints on.
 
 ---
 
