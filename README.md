@@ -6,10 +6,6 @@ This project is developed as an assignment for Coder Academy, it being an API we
 
 ---
 
-## [GitHub repo](https://github.com/jordansbenjamin/Cinematica_API)
-
----
-
 ## Installation Guide
 
 ### System Requirements
